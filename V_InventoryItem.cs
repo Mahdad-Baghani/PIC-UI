@@ -10,8 +10,10 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
     public ItemTypes itemType;
     public ItemClass itemClass;
-    public Sprite icon;
+    public float itemTime;
     public GameObject itemPrfb;
+
+    public Sprite icon;
 
     // buttons
     public Button donateBtn;
@@ -27,6 +29,45 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
     {
         base.Awake();
         Inventory = FindObjectOfType<V_Inventory_UI>();
+
+        UIController.IfClick_GoTo(donateBtn, ()=> Inventory.DonateItem(this));
+        // #revision: Save the deleted item so it doesnt show up anymore
+        UIController.IfClick_GoTo(deleteBtn, () =>
+        {
+            UIController.AskYesNoQ("Do you want to delete this item?",
+            () =>
+            {
+                Destroy(this.gameObject);
+                UIController.CloseYesNoQ();
+            },
+            () =>
+            {
+                UIController.CloseYesNoQ();
+            });
+        });
+
+        if (customizeBtn != null)
+        {
+            // UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
+        }
+    }
+
+    public void Initialize(GameObject prfb)
+    {
+        // #revision: big revision!!! 
+        itemPrfb = prfb;
+        if(
+        itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.rifle)
+        {
+            itemClass = ItemClass.WEAPON;
+            itemType = ItemTypes.W_ASSAULT;
+        }
+        if(itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.pistol)
+        {
+            itemClass = ItemClass.WEAPON;
+            itemType = ItemTypes.W_PISTOL;
+        }
+
 
         switch (itemClass)
         {
@@ -53,27 +94,6 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
                 UIController.ThrowError("V_InventoryItem: Item type is not set properly", UIController.CloseError);
                 break;
         }
-
-        UIController.IfClick_GoTo(donateBtn, ()=> Inventory.DonateItem(this));
-        // #revision: Save the deleted item so it doesnt show up anymore
-        UIController.IfClick_GoTo(deleteBtn, () =>
-        {
-            UIController.AskYesNoQ("Do you want to delete this item?",
-            () =>
-            {
-                Destroy(this.gameObject);
-                UIController.CloseYesNoQ();
-            },
-            () =>
-            {
-                UIController.CloseYesNoQ();
-            });
-        });
-
-        if (customizeBtn != null)
-        {
-            // UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
-        }
     }
     public virtual void OnPointerEnter(PointerEventData data)
     {
@@ -85,11 +105,10 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         {
             Inventory.compareeItem = this;
         }
-        else
-        {
-            Inventory.selectedItem = null;
-        }
-
+        // else
+        // {
+        //     Inventory.selectedItem = null;
+        // }
     }
     public virtual void OnPointerDown(PointerEventData data)
     {

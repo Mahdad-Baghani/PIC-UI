@@ -1,10 +1,14 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
+[RequireComponent(typeof(V_InventoryItems))]
 public class V_Inventory_UI : V_UIElement
 {
 	// fields
+	public V_InventoryItems inventoryItems;
+
 	[SerializeField] private V_InventoryItem _selectedItem;
 	public V_InventoryItem selectedItem
 	{
@@ -27,7 +31,7 @@ public class V_Inventory_UI : V_UIElement
 
     private void HideUpgrades()
     {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }
 
     private void ShowUpgrades(V_InventoryItem item)
@@ -37,14 +41,14 @@ public class V_Inventory_UI : V_UIElement
 			return;
 		}
 		weaponUpgradePanel.SetActive(true);
-		// foreach (V_UpgardeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
+		// foreach (V_UpgardeObject upgrade in item.GetComponent<V_Weapon>().upgrades)
 		// {
 		// 	GameObject tmpObj = UIController.emptyObjectWithImage;
 		// 	// tmpObj.AddComponent<Image>();
 		// 	tmpObj.GetComponent<Image>().sprite = upgrade.icon;
 		// 	tmpObj.transform.SetParent(weaponUpgradePanel.transform ,false);		
 		// }
-		throw new NotImplementedException();
+		// throw new NotImplementedException();
     }
 
     [SerializeField] private V_InventoryItem _compareeItem;
@@ -69,8 +73,8 @@ public class V_Inventory_UI : V_UIElement
 	public Button CharactersBtn;
 
 	public Button eqPistolsBtn;
-	public Button eqRifle1Btn;
-	public Button eqRifle2Btn;
+	public Button eqAssault1Btn;
+	public Button eqAssault2Btn;
 	public Button eqGerenadeBtn;
 	public Button eqMeleeBtn;
 
@@ -99,6 +103,7 @@ public class V_Inventory_UI : V_UIElement
 	// weapons
 	public GameObject pistolPanel;
 	public GameObject assaultPanel;
+	public GameObject eqPistolPanel, eqAssaultPanel,eqAssault2Panel, eqGerenadePanel, eqMeleePanel;
 
 	[SpaceAttribute(10f)]
 	// gears
@@ -109,9 +114,9 @@ public class V_Inventory_UI : V_UIElement
 	[HeaderAttribute("References")]
 	[SpaceAttribute(10f)]
 
-	[SerializeField] protected GameObject weaponComp;
-	[SerializeField] public GameObject gearComp;
-	[SerializeField] public GameObject characterComp;
+	public GameObject weaponComp;
+	public GameObject gearComp;
+	public GameObject characterComp;
 	V_WeaponComparison weaponComparer;
 	V_GearComparison gearComparer;
 	V_CharacterComparison characterComparer;
@@ -125,6 +130,7 @@ public class V_Inventory_UI : V_UIElement
 	public new void Awake()
 	{
 		base.Awake();
+		inventoryItems = GetComponent<V_InventoryItems>();
 		try
 		{
 			weaponComparer = weaponComp.GetComponent<V_WeaponComparison>();
@@ -159,13 +165,19 @@ public class V_Inventory_UI : V_UIElement
 
 		UIController.IfClick_GoTo(pistolsBtn, () => UIController.Enable_DisableUI(pistolPanel, assaultPanel));
 		UIController.IfClick_GoTo(assaultsBtn, () => UIController.Enable_DisableUI(assaultPanel, pistolPanel));
-		// UIController.IfClick_GoTo(gerenadesBtn, () => UIController.Enable_DisableUI(gerenadePanel, pistolPanel, assaultPanel, meleePanel));
-		// UIController.IfClick_GoTo(meleesBtn, () => UIController.Enable_DisableUI(meleePanel, pistolPanel, assaultPanel, gerenadePanel));
-		
+
 		// sub buttons: Gears
 		UIController.IfClick_GoTo(upperBodyBtn, () => UIController.Enable_DisableUI(upperBodyPanel, lowerBodyPanel, headPanel));
 		UIController.IfClick_GoTo(lowerBodyBtn, () => UIController.Enable_DisableUI(lowerBodyPanel, upperBodyPanel, headPanel));
 		UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
+
+		// equipped Items
+		UIController.IfClick_GoTo(eqPistolsBtn, ()=> UIController.Enable_DisableUI(eqPistolPanel, eqAssaultPanel, eqAssault2Panel, eqGerenadePanel,eqMeleePanel));
+		UIController.IfClick_GoTo(eqAssault2Btn, ()=> UIController.Enable_DisableUI(eqAssaultPanel, eqPistolPanel, eqAssault2Panel, eqGerenadePanel, eqMeleePanel));
+		UIController.IfClick_GoTo(eqAssault2Btn, ()=> UIController.Enable_DisableUI(eqAssault2Panel, eqPistolPanel, eqAssaultPanel, eqGerenadePanel, eqMeleePanel));
+		UIController.IfClick_GoTo(eqGerenadeBtn, ()=> UIController.Enable_DisableUI(eqGerenadePanel, eqPistolPanel, eqAssaultPanel, eqAssault2Panel, eqMeleePanel));
+		UIController.IfClick_GoTo(eqMeleeBtn, ()=> UIController.Enable_DisableUI(eqMeleePanel, eqPistolPanel, eqAssaultPanel, eqAssault2Panel, eqGerenadePanel));
+
 
 	}
 
@@ -181,6 +193,42 @@ public class V_Inventory_UI : V_UIElement
 		gearComp.SetActive(false);
 		characterComp.SetActive(false);
 
+		ListItems();
+		
+
+
+	}
+	public void ListItems()
+	{
+		foreach (GameObject item in inventoryItems.GetList())
+		{
+			switch (item.GetComponent<V_InventoryItem>().itemType)
+			{
+				case ItemTypes.W_PISTOL:
+				item.transform.SetParent(pistolPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.W_ASSAULT:
+				item.transform.SetParent(assaultPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_UPPERBODY:
+				item.transform.SetParent(upperBodyPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_LOWERBODY:
+				item.transform.SetParent(lowerBodyPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_HEAD:
+				item.transform.SetParent(headPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				default:
+				UIController.ThrowError("UInitialized gameObject: " + item.name, UIController.CloseError);
+				break;
+			}
+		}
 	}
 
 	public void DonateItem(V_InventoryItem item)
@@ -281,7 +329,7 @@ public class V_Inventory_UI : V_UIElement
 			weaponComparer.fireRate_secondItem.gameObject.SetActive(true);
 			weaponComparer.weight_secondItem.gameObject.SetActive(true);
 
-			tmpWeapon2 = item2.itemPrfb.GetComponent<V_Weapon>();
+			tmpWeapon2 = item2.GetComponent<V_Weapon>();
 			StartCoroutine(UIController.FillSlider(weaponComparer.accuracy_secondItem, tmpWeapon2.accuracy / 100f));
 			StartCoroutine(UIController.FillSlider(weaponComparer.clipSize_secondItem, tmpWeapon2.clipSize  / 100f));
 			StartCoroutine(UIController.FillSlider(weaponComparer.damage_secondItem, tmpWeapon2.damage / 100f));
@@ -310,7 +358,7 @@ public class V_Inventory_UI : V_UIElement
 		else if (item2 != null)
 		{
 			gearComparer.shield_secondItem.gameObject.SetActive(true);
-			tmpGear2 = item2.itemPrfb.GetComponent<V_Gear>();
+			tmpGear2 = item2.GetComponent<V_Gear>();
 			StartCoroutine(UIController.FillSlider(gearComparer.shield_secondItem, tmpGear2.shield));
 		}
 	}

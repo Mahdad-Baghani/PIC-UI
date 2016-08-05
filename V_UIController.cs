@@ -117,7 +117,7 @@ public class V_UIController : MonoBehaviour
         }
         catch (System.Exception err)
         {
-            ThrowError(err.Message + " in ", CloseError);
+            ThrowError(err.Message, CloseError);
             throw;
         }
      
