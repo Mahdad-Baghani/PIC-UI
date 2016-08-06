@@ -37,6 +37,7 @@ public class V_MyInfoItem : V_UIElement, IPointerEnterHandler, IPointerDownHandl
 			// 	case V_Weapon.weaponType.rifle:
 				itemNameTxt.text = someWeapon.name;
 				icon.sprite = someWeapon.icon;
+				// itemle
 				// // itemLevel.sprite = someWeapon.level;
 				// break;
 
@@ -69,9 +70,14 @@ public class V_MyInfoItem : V_UIElement, IPointerEnterHandler, IPointerDownHandl
 		{
 			// #revision
 			// myInfo.upgradeView.headshots.text = data.selectedObject.GetComponent<V_Weapon>().name;
-			myInfo.upgradeView.headshots.text = this.itemPrfb.GetComponent<V_Weapon>().name;
-			myInfo.upgradeView.level.value = Random.Range(0, 1);
-			myInfo.upgradeView.shootingAccuracy.value = Random.Range(0, 1);
+			myInfo.upgradeView.headshots.text = string.Format(Random.Range(0,10) + "headshots wiht " + this.itemPrfb.GetComponent<V_Weapon>().name);
+			// myInfo.upgradeView.level.value = Random.Range(0, 1);
+			// myInfo.upgradeView.shootingAccuracy.value = Random.Range(0, 1);
+			// if (this.itemPrfb.GetComponent<V_Weapon>().level == V_Weapon.weaponLevel.beginner1)
+			// {
+			// 	GameObject tmp = Instantiate(myInfo.upgradeView.levelI);
+			// 	tmp.transform.SetParent(myInfo.upgradeView.levelPanel.transform, false);
+			// }
 		}
 		catch (System.Exception err)
 		{

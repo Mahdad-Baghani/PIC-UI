@@ -3,7 +3,11 @@ using UnityEngine.UI;
 public class V_WeaponUpgradeView : MonoBehaviour 
 {
 	public Text headshots;
-	public Slider level;
-	public Slider shootingAccuracy;
+	public Text bulletsFired;
+
+	public GameObject levelPanel; 
+	public GameObject levelI, levelII, levelIII, levelIV, levelV;
+	
+
 	
 }
