@@ -40,8 +40,8 @@ public class V_Inventory_UI : V_UIElement
 		{
 			return;
 		}
-		weaponUpgradePanel.SetActive(true);
-		// foreach (V_UpgardeObject upgrade in item.GetComponent<V_Weapon>().upgrades)
+		// weaponUpgradePanel.SetActive(true);
+		// foreach (V_UpgardeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
 		// {
 		// 	GameObject tmpObj = UIController.emptyObjectWithImage;
 		// 	// tmpObj.AddComponent<Image>();
