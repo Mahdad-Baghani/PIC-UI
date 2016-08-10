@@ -129,6 +129,8 @@ public class V_UIController : MonoBehaviour
         try
         {
             enableThis.SetActive(true);
+            if (disableThese == null) return;
+            
             foreach (GameObject obj in disableThese)
             {
                 obj.SetActive(false);
@@ -458,7 +460,6 @@ public class V_UIController : MonoBehaviour
         {
             while (true)
             {
-
                 if (time % times != 0)
                 {
                     time++;

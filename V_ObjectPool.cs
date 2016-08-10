@@ -9,6 +9,12 @@ public class V_ObjectPool : MonoBehaviour
 	void Awake()
 	{
 		pool = new Dictionary<string, GameObject>();
+		FillPool();
+		TestPool();
+	}
+	void TestPool()
+	{
+		print(pool["AK47"].name);
 	}
 
 	private void FillPool()
@@ -27,9 +33,9 @@ public class V_ObjectPool : MonoBehaviour
 
 	public GameObject GetItem(string itemName)
 	{
-		if (pool == null || pool.Count == 0)
+		if (pool == null)
 		{
-			FillPool();
+			print("V_ObjectPool: GetItem: pool is null! do somethin about it.");
 		}
 		if (pool.ContainsKey(itemName))
 		{

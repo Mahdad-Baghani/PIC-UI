@@ -10,7 +10,6 @@ public class V_InventoryItems : MonoBehaviour
 	void Awake()
 	{
 		objectPool = FindObjectOfType<V_ObjectPool>();
-		// items = new List<V_InventoryItemTemplate>();
 	}
 	private void RefreshList()
 	{
@@ -27,9 +26,9 @@ public class V_InventoryItems : MonoBehaviour
 			for (int i = 0; i < items.Count; i++)
 			{
 				GameObject tmpObj = Instantiate(inventoryItemPrfb);
-				// GameObject item =  objectPool.GetItem(items[i].itemName);
-				// tmpObj.AddComponent<V_InventoryItem>();
-				// tmpObj.GetComponent<V_InventoryItem>().Initialize(item);
+				GameObject item = Instantiate(objectPool.GetItem(items[i].itemName)) as GameObject;
+				tmpObj.AddComponent<V_InventoryItem>();
+				tmpObj.GetComponent<V_InventoryItem>().Initialize(item);
 				tmpList[i] = tmpObj;
 			}
 			return tmpList;
