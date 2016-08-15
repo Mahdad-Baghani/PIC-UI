@@ -2,7 +2,7 @@
 
 public class V_Clan : MonoBehaviour 
 {
-	public new string name;
+	public string clanName;
 	
 	public Sprite logo;
 }

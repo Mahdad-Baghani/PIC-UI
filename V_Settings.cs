@@ -22,8 +22,8 @@ public class V_Settings : V_UIElement
 	public Dropdown vSyncDropDown;
 	public Slider GammaSlider;
 	public Toggle fulScreenToggle;
-	public Button beginnerGraphicBtn, advancedGraphicBtn, begHighBtn, begMedBtn, begLowBtn;
-	public GameObject beginnerGraphicPanel, advancedGraphicPanel;
+	public Button expressGraphicBtn, advancedGraphicBtn, expressHighBtn, expressMedBtn, expressLowBtn;
+	public GameObject expressGraphicPanel, advancedGraphicPanel;
 	public Dropdown textureDropDown, antiAliasingDropDown;
 	public Toggle weatherToggle, bloodSpatterToggle;
 
@@ -81,12 +81,12 @@ public class V_Settings : V_UIElement
 		UIController.IfClick_GoTo(defaultBtn, RestoreSettings);
 		
 		// video settings buttons
-		UIController.IfClick_GoTo(beginnerGraphicBtn, ()=> {isAdvancedGraphicsEnabled = false; UIController.Enable_DisableUI(beginnerGraphicPanel, advancedGraphicPanel);});
-		UIController.IfClick_GoTo(advancedGraphicBtn, ()=> {isAdvancedGraphicsEnabled = true; UIController.Enable_DisableUI(advancedGraphicPanel, beginnerGraphicPanel);});
+		UIController.IfClick_GoTo(expressGraphicBtn, ()=> {isAdvancedGraphicsEnabled = false; UIController.Enable_DisableUI(expressGraphicPanel, advancedGraphicPanel);});
+		UIController.IfClick_GoTo(advancedGraphicBtn, ()=> {isAdvancedGraphicsEnabled = true; UIController.Enable_DisableUI(advancedGraphicPanel, expressGraphicPanel);});
 
-		UIController.IfClick_GoTo(begHighBtn, ()=> expressType = ExpressGraphicsTypes.HIGH); // for fantastic QualitySettings
-		UIController.IfClick_GoTo(begMedBtn, ()=> expressType = ExpressGraphicsTypes.MED); // for medium and good 
-		UIController.IfClick_GoTo(begLowBtn, ()=> expressType = ExpressGraphicsTypes.LOW);  // for low QualitySettings
+		UIController.IfClick_GoTo(expressHighBtn, ()=> expressType = ExpressGraphicsTypes.HIGH); // for fantastic QualitySettings
+		UIController.IfClick_GoTo(expressMedBtn, ()=> expressType = ExpressGraphicsTypes.MED); // for medium and good 
+		UIController.IfClick_GoTo(expressLowBtn, ()=> expressType = ExpressGraphicsTypes.LOW);  // for low QualitySettings
 
 		// controlsBtns
 		UIController.IfClick_GoTo(mouseBtn, ()=> UIController.Enable_DisableUI(mousePanel, keyboardPanel));
@@ -130,11 +130,11 @@ public class V_Settings : V_UIElement
 			isAdvancedGraphicsEnabled = PlayerPrefs.GetInt("advancedGraphic") == 0 ? false : true;
 			if (isAdvancedGraphicsEnabled)
 			{
-				UIController.Enable_DisableUI(advancedGraphicPanel, beginnerGraphicPanel);
+				UIController.Enable_DisableUI(advancedGraphicPanel, expressGraphicPanel);
 			}
 			else
 			{
-				UIController.Enable_DisableUI(beginnerGraphicPanel, advancedGraphicPanel);
+				UIController.Enable_DisableUI(expressGraphicPanel, advancedGraphicPanel);
 			}
 			
 			expressType = (ExpressGraphicsTypes) PlayerPrefs.GetInt("beginnerGraphics", 0);

@@ -175,7 +175,8 @@ public class V_UIController : MonoBehaviour
             {
                 tmpRndr.SetAlpha(lerp);
                 panel.SetActive(true);
-                lerp += fadeFactor;
+                lerp += fadeFactor * Time.deltaTime;
+                print(lerp);
                 yield return new WaitForSeconds(waitFactor);
             }  
         }
@@ -190,14 +191,16 @@ public class V_UIController : MonoBehaviour
             print("V_UIController: FadeOut: cannot get te CanvasRenderer on " + panel.name);
             panel.AddComponent<CanvasRenderer>();
         }
-       
-        while (lerp >= 0)
+        else   
         {
-            tmpRndr.SetAlpha(lerp);
-            lerp -= fadeFactor;
-            yield return new WaitForSeconds(fadeFactor);
+            while (lerp >= 0)
+            {
+                tmpRndr.SetAlpha(lerp);
+                lerp -= fadeFactor * Time.deltaTime;
+                yield return new WaitForSeconds(waitFactor);
+            }
+            panel.SetActive(false);
         }
-        panel.SetActive(false);
     }
     public void LoadThumbnailMaps()
     {
@@ -460,8 +463,9 @@ public class V_UIController : MonoBehaviour
     {
         float tmp = 0f;
         slider.value = 0f;
-        int times = 10;
+        int times = 10; // just to not make the CPU too busy with simultaneous coroutines
         int time = 0;
+
         if (slider !=null)
         {
             while (true)
@@ -469,7 +473,7 @@ public class V_UIController : MonoBehaviour
                 if (time % times != 0)
                 {
                     time++;
-                    yield return null;
+                    continue;
                 }
                 time++;
                 tmp += Time.deltaTime;

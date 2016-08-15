@@ -79,7 +79,7 @@ public class V_MyInfo : V_UIElement
 			{
 				clanLogo.transform.parent.gameObject.SetActive(true);
 				clanLogo.sprite = playerModel.clan.logo;
-				clanName.text = playerModel.clan.name;
+				clanName.text = playerModel.clan.clanName;
 			}
 			else
 			{
