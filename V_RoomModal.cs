@@ -2,38 +2,31 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class V_RoomModal : MonoBehaviour 
+public class V_RoomModal : V_UIElement 
 {
 	// #revision
-	V_UIController UIController;
 	V_CustomLobbyManager LobbyManager;
 	
 	// buttons
 	[HeaderAttribute("RoomModalPanel Buttons")]
 	[SpaceAttribute(10f)]
 
-	[SerializeField]
-	Button createButton;
-	[SerializeField]
-	Button cancelButton;
-	public Button goForwardInMaps;
-	public Button goBackwardInMaps;
+	public Button createButton;
+	public Button cancelButton, goForwardInMaps, goBackwardInMaps;
 
 	// room vars
 	[HeaderAttribute("RoomModalPanel variables")]
 	[SpaceAttribute(10f)]
 	public InputField roomName;
-	public Dropdown playerMode;
-	public Dropdown gameMode;
 	public InputField password;
+	public Dropdown playerMode, gameMode;
 	public Image map;
 	public Text mapName;
 
 	
-	void Awake()
+	new void Awake()
 	{
 		// #revision
-		UIController = FindObjectOfType<V_UIController>();
 		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
 
 		UIController.IfClick_GoTo(createButton, OnCreateRoom);
@@ -54,8 +47,9 @@ public class V_RoomModal : MonoBehaviour
 	}
 
 
-    void OnEnable()
+    new void OnEnable()
 	{
+		base.OnEnable();
 		UIController.GetItemInDropDown(gameMode, UIController.ReturnGameMode(LobbyManager.currentRoom.gameMode));
 	}
 	void OnCreateRoom()
@@ -65,7 +59,7 @@ public class V_RoomModal : MonoBehaviour
 		{
 			UIController.ThrowError("V_CustomLobbyManager: currentRoom is not set", ()=>
 			{
-				UIController.GoFrom_To(UIController.genericErrorModal, this.gameObject);
+				UIController.CloseError();
 			});
 			// do something about it!!! and then:
 			return;

@@ -10,11 +10,6 @@ public class V_ObjectPool : MonoBehaviour
 	{
 		pool = new Dictionary<string, GameObject>();
 		FillPool();
-		TestPool();
-	}
-	void TestPool()
-	{
-		print(pool["AK47"].name);
 	}
 
 	private void FillPool()

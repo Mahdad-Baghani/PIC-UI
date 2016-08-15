@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class V_Lobby : MonoBehaviour 
+public class V_Lobby : V_UIElement 
 {
 	// fields
 	
 	// #revision
-	V_UIController UIController;
 	V_CustomLobbyManager LobbyManager;
 	
 	// panels to go from Lobby
@@ -31,10 +30,10 @@ public class V_Lobby : MonoBehaviour
 
 	private bool firstCreateTheRoom = true; // !!!
 	
-	void Awake()
+	new void Awake()
 	{
+		base.Awake();
 		// #Revision 
-		UIController = FindObjectOfType<V_UIController>();
 		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
 		// UIController = pic.controller.UIcontroller;
 
@@ -45,8 +44,9 @@ public class V_Lobby : MonoBehaviour
 		UIController.IfClick_GoTo(GM_TMD_Button, () => {ChangeGameMode(GameModes.TDM);});
 
 	}
-	void OnEnable()
+	new void OnEnable()
 	{
+		base.OnEnable();
 		UIController.IfClick_GoTo(UIController.backButton, () =>
 		{
 			

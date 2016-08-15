@@ -149,10 +149,16 @@ public class V_UIController : MonoBehaviour
         dropdown.onValueChanged.AddListener(someEvent);
     }
 
-    public void ifType_DoThis(InputField input, UnityAction eve)
+    public void OnSliderChangesValue(Slider slider, UnityAction<float> someEvent)
     {
-        input.onEndEdit.RemoveAllListeners();
-        // input.onEndEdit.AddListener(eve<string>);
+        slider.onValueChanged.RemoveAllListeners();
+        slider.onValueChanged.AddListener(someEvent);
+    }
+
+    public void ifType_DoThis(InputField input, UnityAction<string> someEvent)
+    {
+        input.onValueChanged.RemoveAllListeners();
+        input.onValueChanged.AddListener(someEvent);
     }
 
     public IEnumerator FadeIn(GameObject panel)
