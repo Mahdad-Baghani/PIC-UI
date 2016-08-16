@@ -9,6 +9,7 @@ public class V_PlayerTemplate : MonoBehaviour
 	public Sprite icon;
 	public V_Badge badge;
 	public List<V_Achievement> achievements;
+	public V_PlayerTemplate comrade;
 	public V_Clan clan;
 	public List<V_Weapon> weapons;
 

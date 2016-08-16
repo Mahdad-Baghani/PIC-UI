@@ -3,10 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class V_Room : MonoBehaviour 
+public class V_Room : V_UIElement 
 {
 	// fields
-	V_UIController UIController;
 	V_CustomLobbyManager LobbyManager;
 	
 	// room var
@@ -42,25 +41,36 @@ public class V_Room : MonoBehaviour
 	
 	
 	// methods
-	void Awake()
+	new void Awake()
 	{
-		UIController = FindObjectOfType<V_UIController>();
-		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
+		base.Awake();
 
+		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
 
 		UIController.IfClick_GoTo(start_Join_Ready, StartJoin);
 		UIController.IfClick_GoTo(inviteBtn, Invite);
-		
-		UIController.OnDropDownChangesValue(gameMode, (value) => ChangeObjective(value));
+
+		UIController.ifType_DoThis(roomName, (value)=> LobbyManager.currentRoom.roomName = value);
+		UIController.OnDropDownChangesValue(gameMode, (value)=> 
+		{
+			LobbyManager.currentRoom.gameMode = UIController.ReturnGameMode(gameMode.options[gameMode.value].text);
+			ChangeObjective(value);
+		});
+		UIController.OnDropDownChangesValue(playerMode, (value)=> LobbyManager.currentRoom.playerMode = UIController.ReturnPlayerMode(playerMode.options[playerMode.value].text));
+		UIController.OnDropDownChangesValue(map, (value)=> LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[map.value].text));
+		UIController.OnDropDownChangesValue(objectives, (value)=> LobbyManager.currentRoom.objectives = (int)value);
+		UIController.ifType_DoThis(password, (value)=> LobbyManager.currentRoom.password = value);
+		UIController.OnDropDownChangesValue(weaponFilter, (value)=> LobbyManager.currentRoom.weaponFilter = UIController.ReturnWeaponFilter(weaponFilter.options[weaponFilter.value].text));
+
 		
 		// UIController.OnDropDownChangesValue(map, (value) => {LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[map.value].text);});
 		// #revision
 		// do this for other dropdowns
 		
 	} 
-	void OnEnable()
+	new void OnEnable()
 	{
-
+		base.OnEnable();
 		UIController.IfClick_GoTo(UIController.backButton, 
 		() => 
 		{

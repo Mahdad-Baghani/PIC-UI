@@ -9,24 +9,18 @@ public class V_Lobby : V_UIElement
 	V_CustomLobbyManager LobbyManager;
 	
 	// panels to go from Lobby
-	[SerializeField]
-	GameObject gameModePanel;
+	public GameObject gameModePanel;
 	
 	// Buttons
 
-	[SerializeField]
-	Button enterButton;
+	public Button enterButton;
 	
-	[SerializeField]
-	Button createRoomButton;
-	[SerializeField]
-	Button fastRoomButton;
+	public Button createRoomButton;
+	public Button fastRoomButton;
 
-	[SerializeField]
-	Button GM_SD_Button;
+	public Button GM_SD_Button;
 
-	[SerializeField]
-	Button GM_TMD_Button;
+	public Button GM_TMD_Button;
 
 	private bool firstCreateTheRoom = true; // !!!
 	

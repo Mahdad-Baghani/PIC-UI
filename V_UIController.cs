@@ -44,6 +44,7 @@ public class V_UIController : MonoBehaviour
     public GameObject LobbyPanel;
     public GameObject RoomModalPanel;
     public GameObject RoomPanel;
+    public GameObject ClanModalPanel;
     public Text toolTipBar;
 
     [SpaceAttribute(5f)]
@@ -142,6 +143,28 @@ public class V_UIController : MonoBehaviour
             throw;
         }
     }
+    public void Disable_EnableUI(GameObject disableThis, params GameObject[] enableThese)
+    {
+        try
+        {
+            if (disableThis == null) 
+            {
+                ThrowError("V_UIController: Disable_EnableUI(): item to disable is null, dude", CloseError);
+            }
+            disableThis.SetActive(false);
+            if(enableThese == null) return;
+
+            foreach (GameObject obj in enableThese)
+            {
+                obj.SetActive(true);
+            }
+        }
+        catch (System.Exception err)
+        {
+            ThrowError("V_UIController: Disable_EnableUI(): " + err.Message, CloseError);
+            throw;
+        }
+    }
 
     public void OnDropDownChangesValue(Dropdown dropdown, UnityAction<int> someEvent)
     {
@@ -176,8 +199,8 @@ public class V_UIController : MonoBehaviour
                 tmpRndr.SetAlpha(lerp);
                 panel.SetActive(true);
                 lerp += fadeFactor * Time.deltaTime;
-                print(lerp);
                 yield return new WaitForSeconds(waitFactor);
+                // print(lerp);
             }  
         }
 
@@ -484,8 +507,6 @@ public class V_UIController : MonoBehaviour
                 {
                     yield break;
                 }
-
-                // slider.value += Mathf.Lerp()
                 // print(slider.value.ToString());
                 // print(slider.name);
             }

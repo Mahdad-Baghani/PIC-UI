@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class V_Settings : V_UIElement 
 {
-	V_AudioController audioController;
 	public enum ExpressGraphicsTypes {HIGH = 6, MED = 3, LOW = 0};
+	V_AudioController audioController;
 	ExpressGraphicsTypes expressType;
 	bool isAdvancedGraphicsEnabled = false;
 
@@ -49,8 +49,8 @@ public class V_Settings : V_UIElement
 	public Slider greenSlider, blueSlider, crosshairSizeSlider;
 	public Image currentCrosshair;
 		// cached ref to RectTransform of crosshairs
-		private RectTransform rt;
-		// a vector to keep the original size of the crosshair so it wont get distorted
+		private RectTransform crosshairRectTransform;
+		// a vector to keep the original size of the crosshair so it wont get distocrosshairRectTransformed when we change its size at runtime
 		private Vector2 crosshairOriginalSize;
 	private float crosshairSizeFactor = 1f;
 	public Image[] crosshairs;
@@ -63,8 +63,8 @@ public class V_Settings : V_UIElement
 		base.Awake();
 		// dependencies
 		audioController = FindObjectOfType <V_AudioController>();
-		rt = currentCrosshair.rectTransform;
-		crosshairOriginalSize =  new Vector2 (rt.rect.width, rt.rect.height);
+		crosshairRectTransform = currentCrosshair.rectTransform;
+		crosshairOriginalSize =  new Vector2 (crosshairRectTransform.rect.width, crosshairRectTransform.rect.height);
 		// checking if dependencies are null to throw err
 		if (audioController == null)
 		{
@@ -160,8 +160,8 @@ public class V_Settings : V_UIElement
 			// mouse settings
 			StartCoroutine(UIController.FillSlider(mouseSensitivitySlider, PlayerPrefs.GetFloat("mouseSensitivity", 0)));
 			StartCoroutine(UIController.FillSlider(zoomSensitivitySlider, PlayerPrefs.GetFloat("zoomSensitivity", 0)));
-			invertToggle.isOn = PlayerPrefs.GetInt("invert") == 1 ? true : false;
-			invertMouseButtonsToggle.isOn = PlayerPrefs.GetInt("invertMouseButtons") == 1 ? true : false;
+			invertToggle.isOn = PlayerPrefs.GetInt("invecrosshairRectTransform") == 1 ? true : false;
+			invertMouseButtonsToggle.isOn = PlayerPrefs.GetInt("invecrosshairRectTransformMouseButtons") == 1 ? true : false;
 			// keyboard settings
 
 			rightInput.text = PlayerPrefs.GetString("right");
@@ -228,8 +228,8 @@ public class V_Settings : V_UIElement
 			// mouse
 			PlayerPrefs.SetFloat("mouseSensitivity", mouseSensitivitySlider.value);
 			PlayerPrefs.SetFloat("zoomSensitivity", zoomSensitivitySlider.value);
-			PlayerPrefs.SetInt("invert", invertToggle.isOn ? 1 : 0);
-			PlayerPrefs.SetInt("invertMouseButtons", invertMouseButtonsToggle.isOn ? 1 : 0);
+			PlayerPrefs.SetInt("invecrosshairRectTransform", invertToggle.isOn ? 1 : 0);
+			PlayerPrefs.SetInt("invecrosshairRectTransformMouseButtons", invertMouseButtonsToggle.isOn ? 1 : 0);
 			// keyboard
 			PlayerPrefs.SetString("right", rightInput.text);
 			PlayerPrefs.SetString("crouch", crouchInput.text);
@@ -325,6 +325,6 @@ public class V_Settings : V_UIElement
 	}
 	void ChangeCrosshairSize(float value)
 	{
-		rt.sizeDelta = new Vector2(crosshairOriginalSize.x * value, crosshairOriginalSize.y * value);
+		crosshairRectTransform.sizeDelta = new Vector2(crosshairOriginalSize.x * value, crosshairOriginalSize.y * value);
 	}
 }

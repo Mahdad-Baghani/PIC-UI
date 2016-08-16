@@ -9,7 +9,7 @@ public class V_Comrade : V_UIElement
 	[HeaderAttribute("UI refs")]
 	public Text nicknameText;
 	public Text clanText, badgeText, numberOfTKillsText, numberOfDeathsText, onNotHavingAComradeAlertText;
-	[RangeAttribute(0,15f)][SerializeField] float comradeAlertDelay = 3f; // just some default value, tweak from the inspector
+	[RangeAttribute(0,15f)][SerializeField] float comradeAlertDelay; //  tweak from the inspector
 
 	new void Awake()
 	{
@@ -21,15 +21,16 @@ public class V_Comrade : V_UIElement
 	}
 	IEnumerator Start()
 	{
+		// ourCharacter = FindObjectOfType<V_PlayerTemplate>();
 		if (ourCharacter == null)
 		{
-				UIController.ThrowError("V_Comrade: Awake: ourCharacter or hisComrade ref is null!!!", ()=> {UIController.CloseError(); return;});
+				UIController.ThrowError("V_Comrade: Awake: ourCharacter or hisComrade ref is null!!!", ()=> {UIController.CloseError();});
 		}
 		if (hisComrade == null)
 		{
 			yield return new WaitForSeconds(2f);
 			yield return StartCoroutine(UIController.FadeIn(onNotHavingAComradeAlertText.gameObject));
-			yield return new WaitForSeconds(comradeAlertDelay); // #revision: time is 
+			yield return new WaitForSeconds(comradeAlertDelay); 
 			yield return StartCoroutine(UIController.FadeOut(onNotHavingAComradeAlertText.gameObject));
 		}
 		else
