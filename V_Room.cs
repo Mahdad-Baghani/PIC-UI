@@ -9,35 +9,13 @@ public class V_Room : V_UIElement
 	V_CustomLobbyManager LobbyManager;
 	
 	// room var
-	[SerializeField]
-	InputField roomName;
-	
-	[SerializeField]
-	Dropdown map;
-	
-	[SerializeField]
-	Dropdown gameMode;
-	
-	[SerializeField]
-	Dropdown playerMode;
-	
-	[SerializeField]
-	Dropdown objectives;
-	
-	[SerializeField]
-	Text objectiveText;
-
-	[SerializeField]
-	InputField password;
-	[SerializeField]
-	Dropdown weaponFilter;
-
-	// public ScrollRect blueTeam;
-	// public ScrollRect redTeam;
+	[SerializeField] InputField roomName;
+	[SerializeField] Dropdown map, gameMode, playerMode, objectives, weaponFilter, gameTime;
+	[SerializeField] Text objectiveText;
+	[SerializeField] InputField password;
 
 	//  buttons
-	public Button start_Join_Ready;
-	public Button inviteBtn;
+	public Button start_Join_Ready, inviteBtn;
 	
 	
 	// methods
@@ -57,16 +35,15 @@ public class V_Room : V_UIElement
 			ChangeObjective(value);
 		});
 		UIController.OnDropDownChangesValue(playerMode, (value)=> LobbyManager.currentRoom.playerMode = UIController.ReturnPlayerMode(playerMode.options[playerMode.value].text));
-		UIController.OnDropDownChangesValue(map, (value)=> LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[map.value].text));
-		UIController.OnDropDownChangesValue(objectives, (value)=> LobbyManager.currentRoom.objectives = (int)value);
+		UIController.OnDropDownChangesValue(map, (value)=> LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[value].text));
+		UIController.OnDropDownChangesValue(objectives, (value)=> LobbyManager.currentRoom.objectives = int.Parse(objectives.options[value].text));
 		UIController.ifType_DoThis(password, (value)=> LobbyManager.currentRoom.password = value);
 		UIController.OnDropDownChangesValue(weaponFilter, (value)=> LobbyManager.currentRoom.weaponFilter = UIController.ReturnWeaponFilter(weaponFilter.options[weaponFilter.value].text));
-
+		UIController.OnDropDownChangesValue(gameTime, (value)=> LobbyManager.currentRoom.gameTime = int.Parse(gameTime.options[value].text));
 		
 		// UIController.OnDropDownChangesValue(map, (value) => {LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[map.value].text);});
 		// #revision
 		// do this for other dropdowns
-		
 	} 
 	new void OnEnable()
 	{
@@ -86,6 +63,9 @@ public class V_Room : V_UIElement
 				UIController.GoFrom_To(UIController.genericYesNoModal, UIController.RoomPanel);
 			});
 		});
+
+		// #revision: read all the on-server data to keep UI in sync.
+		UIController.GetItemInDropDown(gameMode, UIController.ReturnGameMode(LobbyManager.currentRoom.gameMode));
 		
 		// #revision
 		
@@ -96,6 +76,16 @@ public class V_Room : V_UIElement
 		}
 		else
 		{
+			roomName.interactable = false;
+			gameMode.interactable = false;
+			playerMode.interactable = false;
+			map.interactable = false;
+			objectives.interactable = false;
+			password.interactable = false;
+			weaponFilter.interactable = false;
+			gameTime.interactable = false;
+			
+			
 			if (LobbyManager.currentRoom != null && LobbyManager.currentRoom.hasAnActiveGame)
 			{
 				start_Join_Ready.GetComponentInChildren<Text>().text = "Join";

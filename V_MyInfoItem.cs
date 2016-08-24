@@ -19,6 +19,10 @@ public class V_MyInfoItem : V_UIElement, IPointerEnterHandler, IPointerDownHandl
 		base.Awake();
 		myInfo = FindObjectOfType<V_MyInfo>();
 	}
+	new void OnEnable()
+	{
+		// do not call base.OnEnable on this type of objects, so we keep it seperate from UI panels which need to call base.OnEnable() while hiding it
+	}
 
 	public void Initialize(GameObject prfb)
 	{

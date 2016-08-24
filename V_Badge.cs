@@ -21,6 +21,15 @@ public class V_Badge : V_UIElement
 	public Sprite badgeIcon;
 	public string badgeName;
 
+
+	new void Awake()
+	{
+
+	}
+	new void OnEnable()
+	{
+		// do not call base.OnEnable on this type of objects, so we keep it seperate from UI panels which need to call base.OnEnable() while hiding it
+	}
 	public void SetBadge (out V_Badge tmpBadge, BadgeType type)
 	{
 		try

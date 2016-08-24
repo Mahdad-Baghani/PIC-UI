@@ -15,12 +15,9 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
     // buttons and UI refs
     public Image icon;
-    public Button donateBtn;
-    public Button deleteBtn;
-    public Button customizeBtn;
-    public Text itemNameTxt;
+    public Button donateBtn, deleteBtn, customizeBtn;
+    public Text itemNameTxt, timeTxt;
     public Image level;
-    public Text timeTxt;
 
 
     // methods
@@ -49,6 +46,10 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         {
             // UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
         }
+    }
+    new void OnEnable()
+    {
+        // do not call base.OnEnable on this type of objects, so we keep it seperate from UI panels which need to call base.OnEnable() while hiding it
     }
 
     public void Initialize(GameObject prfb)
@@ -119,7 +120,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
     public  IEnumerator OnPointerDown_C(PointerEventData data)
     {
         // Double click factor
-        float dbFactor = 0.2f;
+        float dbFactor = 1f;
         if (data.button == PointerEventData.InputButton.Left)
         {
             EventSystem.current.SetSelectedGameObject(gameObject, data);
@@ -132,7 +133,6 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         if (data.button == PointerEventData.InputButton.Left)
         {
             // Inventory.Equip(this);
-
             print("equipped item " + this.name);
         }
         yield return null;

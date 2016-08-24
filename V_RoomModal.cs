@@ -10,7 +10,6 @@ public class V_RoomModal : V_UIElement
 	// buttons
 	[HeaderAttribute("RoomModalPanel Buttons")]
 	[SpaceAttribute(10f)]
-
 	public Button createButton;
 	public Button cancelButton, goForwardInMaps, goBackwardInMaps;
 
@@ -26,6 +25,7 @@ public class V_RoomModal : V_UIElement
 	
 	new void Awake()
 	{
+		base.Awake();
 		// #revision
 		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
 
@@ -34,6 +34,7 @@ public class V_RoomModal : V_UIElement
 		UIController.IfClick_GoTo(goForwardInMaps, ()=> ChangeMap(goToNextMap: true));
 		UIController.IfClick_GoTo(goBackwardInMaps,()=> ChangeMap(goToNextMap: false));
 
+		// #revision
 		if (UIController.thumbnailMaps == null)
 		{
 			UIController.ThrowError("Thumbnails are not set for maps", ()=> 
@@ -54,14 +55,15 @@ public class V_RoomModal : V_UIElement
 	}
 	void OnCreateRoom()
 	{
-
 		if (LobbyManager.currentRoom == null)
 		{
-			UIController.ThrowError("V_CustomLobbyManager: currentRoom is not set", ()=>
-			{
-				UIController.CloseError();
-			});
+			UIController.ThrowError("V_CustomLobbyManager: currentRoom is not set", UIController.CloseError);
 			// do something about it!!! and then:
+			return;
+		}
+		if (roomName.text == "")
+		{
+			UIController.ThrowError("The name of the room cannot be empty.", UIController.CloseError);
 			return;
 		}
 		LobbyManager.currentRoom.roomName = roomName.text;
@@ -89,15 +91,14 @@ public class V_RoomModal : V_UIElement
 		}, 
 		() => // no answer
 		{
-			UIController.GoFrom_To(UIController.genericYesNoModal, UIController.RoomModalPanel);
+			UIController.CloseYesNoQ();
 		});
 	}
     private void ChangeMap(bool goToNextMap)
     {
-		// print("changing map");
 		if (UIController.thumbnailMaps == null)
 		{
-			UIController.ThrowError("V_UIController: thumbnailMaps is null", ()=> UIController.GoFrom_To(UIController.genericErrorModal, this.gameObject));
+			UIController.ThrowError("V_UIController: thumbnailMaps is null", ()=> UIController.CloseError());
 		}
 
 		for(int i = 0; i < UIController.thumbnailMaps.Length; i++)
@@ -121,7 +122,6 @@ public class V_RoomModal : V_UIElement
 						mapName.text = UIController.ReturnMap(0);
 						break;	 
 					}
-
 				}
 				// if we are going backward in maps
 				else

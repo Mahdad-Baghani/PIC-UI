@@ -1,7 +1,6 @@
 [System.SerializableAttribute]
 public class V_RoomTemplate
 {
-    
     // fields
     public  bool hasAnActiveGame = false;
 
@@ -13,4 +12,5 @@ public class V_RoomTemplate
     public int objectives;
     public string password;
     public WeaponFilter weaponFilter;
+    public int gameTime;
 }

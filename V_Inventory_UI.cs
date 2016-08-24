@@ -26,6 +26,19 @@ public class V_Inventory_UI : V_UIElement
 			 }
 		}
 	}
+    [SerializeField] private V_InventoryItem _compareeItem;
+	public V_InventoryItem compareeItem
+	{
+		get { return _compareeItem;}
+		set 
+		{
+			_compareeItem = value;
+			if (_compareeItem != _selectedItem)
+			{
+				CompareItems(_selectedItem, _compareeItem);
+			}
+		}
+	}
 
     private void HideUpgrades()
     {
@@ -49,19 +62,6 @@ public class V_Inventory_UI : V_UIElement
 		// throw new NotImplementedException();
     }
 
-    [SerializeField] private V_InventoryItem _compareeItem;
-	public V_InventoryItem compareeItem
-	{
-		get { return _compareeItem;}
-		set 
-		{
-			_compareeItem = value;
-			if (_compareeItem != _selectedItem)
-			{
-				CompareItems(_selectedItem, _compareeItem);
-			}
-		}
-	}
 
 	[HeaderAttribute("Inventory main Buttons")]
 	[SpaceAttribute(10f)]
@@ -192,12 +192,10 @@ public class V_Inventory_UI : V_UIElement
 		characterComp.SetActive(false);
 
 		ListItems();
-		
-
-
 	}
 	public void ListItems()
 	{
+
 		foreach (GameObject item in inventoryItems.GetList())
 		{
 			switch (item.GetComponent<V_InventoryItem>().itemType)

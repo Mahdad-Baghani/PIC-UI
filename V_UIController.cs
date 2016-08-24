@@ -44,7 +44,6 @@ public class V_UIController : MonoBehaviour
     public GameObject LobbyPanel;
     public GameObject RoomModalPanel;
     public GameObject RoomPanel;
-    public GameObject ClanModalPanel;
     public Text toolTipBar;
 
     [SpaceAttribute(5f)]
@@ -414,6 +413,20 @@ public class V_UIController : MonoBehaviour
         }
     }
 
+    public int ReturnGameObjectives(int i)
+    {
+        switch(i)
+        {
+            case 0:
+            return 2;
+
+            case 1:
+            return 5;
+
+            default:
+            return 2;
+        }
+    }
     public void GetItemInDropDown(Dropdown dropdown, string item)
     {
         int tmp = 0;

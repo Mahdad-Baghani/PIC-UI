@@ -45,8 +45,7 @@ public class V_Settings : V_UIElement
 	public Slider fxVolSlider, voiceVolSlider;
 
 	[HeaderAttribute("other Settings")]
-	public Slider redSlider;
-	public Slider greenSlider, blueSlider, crosshairSizeSlider;
+	public Slider crosshairSizeSlider;
 	public Image currentCrosshair;
 		// cached ref to RectTransform of crosshairs
 		private RectTransform crosshairRectTransform;
@@ -315,13 +314,6 @@ public class V_Settings : V_UIElement
 		// 	}
 		// 	y++;
 		// }
-	}
-	void ChangeTextureColor(Renderer renderer)
-	{
-		if (renderer != null)
-		{
-			renderer.material.color = new Color(redSlider.value, greenSlider.value, blueSlider.value);
-		}
 	}
 	void ChangeCrosshairSize(float value)
 	{
