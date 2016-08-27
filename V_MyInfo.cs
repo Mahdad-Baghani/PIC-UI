@@ -70,6 +70,7 @@ public class V_MyInfo : V_UIElement
 	public new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 		try
 		{
 			badgeImage.sprite = playerModel.badge.badgeIcon;

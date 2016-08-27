@@ -9,10 +9,13 @@ public class V_UIController : MonoBehaviour
     public static V_PlayerTemplate playerModel;
     // consts for room,
     // use this in sync with UI
+    
+    // GM: GameModes 
     public const string GM_SD = "Search and Destroy";
     public const string GM_TDM = "Team DeathMatch";
     public const string GM_DM = "DeathMatch";
 
+    // PM: PlayerModes
     public const string PM_ON1 = "1 On 1";
     public const string PM_ON2 = "2 On 2";
     public const string PM_ON3 = "3 On 3";
@@ -22,13 +25,22 @@ public class V_UIController : MonoBehaviour
     public const string PM_ON7 = "7 On 7";
     public const string PM_ON8 = "8 On 8";
 
+    // M: Maps
     public const string M_DUST = "Dust";
     public const string M_RUST = "Rust";
 
+    // WF: WeaponFilters
     public const string WF_NONE = "None";
     public const string WF_KNIFE = "Knife only";
     public const string WF_ASSAULT = "Assault only";
     public const string WF_GERENADE = "Gerenade only";
+
+    // O: Objectives
+    public const string O_DEFAULT_FOR_SD = "1";
+    public const string O_DEFAULT_FOR_DM = "30";
+
+    // T: Time
+    public const string T_DEFAULT_TIME = "2";
 
 
     // fields
@@ -42,8 +54,8 @@ public class V_UIController : MonoBehaviour
     [HeaderAttribute("UI Panels")]
     [SpaceAttribute(5f)]
     public GameObject LobbyPanel;
-    public GameObject RoomModalPanel;
-    public GameObject RoomPanel;
+    public GameObject RoomModalPanel, RoomPanel, ComradePanel, InventoryPanel, ShopPanel, MyInfoPanel, SettingPanel; 
+
     public Text toolTipBar;
 
     [SpaceAttribute(5f)]
@@ -82,7 +94,7 @@ public class V_UIController : MonoBehaviour
     {
         playerModel = FindObjectOfType<V_PlayerTemplate>();
     }
-    public void GoFrom_To (GameObject from, GameObject nextPanel)
+    public void GoFrom_To(GameObject from, GameObject nextPanel)
     {
        if (nextPanel != null && from != null)
        {           
@@ -91,6 +103,16 @@ public class V_UIController : MonoBehaviour
            currentPanel = nextPanel;
        }
     }
+    public void GoTo(GameObject nextPanel)
+    {
+        if(nextPanel != null)
+        {
+            currentPanel.SetActive(false);
+            nextPanel.SetActive(true);
+            currentPanel = nextPanel;
+        }
+    }
+    
 
     public void GoFrom_To(GameObject from, GameObject nextPanel, bool killPreviousPanel)
     {
@@ -181,6 +203,12 @@ public class V_UIController : MonoBehaviour
     {
         input.onValueChanged.RemoveAllListeners();
         input.onValueChanged.AddListener(someEvent);
+    }
+
+    public void OnToggleChangeValue (Toggle toggle, UnityAction<bool> someEvent)
+    {
+        toggle.onValueChanged.RemoveAllListeners();
+        toggle.onValueChanged.AddListener(someEvent);
     }
 
     public IEnumerator FadeIn(GameObject panel)
@@ -413,18 +441,21 @@ public class V_UIController : MonoBehaviour
         }
     }
 
-    public int ReturnGameObjectives(int i)
+    public string ReturnGameObjectives(GameModes gm)
     {
-        switch(i)
+        switch(gm)
         {
-            case 0:
-            return 2;
+            case GameModes.SD:
+            return O_DEFAULT_FOR_SD;
 
-            case 1:
-            return 5;
+            case GameModes.DM:
+            return O_DEFAULT_FOR_DM;
+
+            case GameModes.TDM:
+            return O_DEFAULT_FOR_DM;
 
             default:
-            return 2;
+            return O_DEFAULT_FOR_SD;
         }
     }
     public void GetItemInDropDown(Dropdown dropdown, string item)

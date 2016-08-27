@@ -20,6 +20,11 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
     public Image level;
 
 
+    // Double click vars
+    bool mouseClickStarted = false;
+    int mouseClickNumber = 0;
+    [SerializeField] float mouseDoubleClickLimit = .25f; // tweak from inspector
+
     // methods
     public new void Awake()
     {
@@ -33,6 +38,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             UIController.AskYesNoQ("Do you want to delete this item?",
             () =>
             {
+                // #revision
                 Destroy(this.gameObject);
                 UIController.CloseYesNoQ();
             },
@@ -98,10 +104,6 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             }
         }
     }
-    public virtual void OnPointerDown(PointerEventData data)
-    {
-        StartCoroutine(OnPointerDown_C(data));
-    }
     public virtual void OnPointerEnter(PointerEventData data)
     {
         if (Inventory.selectedItem == null)
@@ -112,15 +114,22 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         {
             Inventory.compareeItem = this;
         }
-        // else
-        // {
-        //     Inventory.selectedItem = null;
-        // }
+        else
+        {
+            Inventory.compareeItem = null;
+        }
     }
-    public  IEnumerator OnPointerDown_C(PointerEventData data)
+    public virtual void OnPointerDown(PointerEventData data)
     {
-        // Double click factor
-        float dbFactor = 1f;
+        // detecting Double click
+        mouseClickNumber++;
+        if (mouseClickStarted)
+        {
+            return;
+        }        
+        mouseClickStarted = true;
+        StartCoroutine(OnDoubleClick());
+        
         if (data.button == PointerEventData.InputButton.Left)
         {
             EventSystem.current.SetSelectedGameObject(gameObject, data);
@@ -129,17 +138,21 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         {
             Inventory.compareeItem = null;
         }
-        yield return new WaitForSeconds(dbFactor);
-        if (data.button == PointerEventData.InputButton.Left)
-        {
-            // Inventory.Equip(this);
-            print("equipped item " + this.name);
-        }
-        yield return null;
+
     }
     public virtual void OnPointerExit(PointerEventData data)
     {
         // Inventory.compareeItem = null;
+    }
+    IEnumerator OnDoubleClick()
+    {
+        yield return new WaitForSeconds(mouseDoubleClickLimit);
+        if (mouseClickNumber > 1)
+        {
+            print("Equipped with " + this.itemPrfb.name);
+        }
+        mouseClickStarted = false;
+        mouseClickNumber = 0;
     }
 
     public virtual void OnSelect(BaseEventData data)

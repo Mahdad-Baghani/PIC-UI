@@ -111,6 +111,8 @@ public class V_Settings : V_UIElement
     new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
+
 		LoadSettings();
 	}
     private void CancelSettings()

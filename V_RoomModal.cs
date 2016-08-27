@@ -77,8 +77,9 @@ public class V_RoomModal : V_UIElement
 		LobbyManager.currentRoom.password = password.text;
 		
 		LobbyManager.SaveRoom(LobbyManager.currentRoom.ID, LobbyManager.currentRoom);
-		
-		UIController.GoFrom_To(UIController.RoomModalPanel, UIController.RoomPanel);
+
+		UIController.Disable_EnableUI(this.gameObject);
+		UIController.GoFrom_To(UIController.currentPanel, UIController.RoomPanel);
 	}
 	void OnCancel()
 	{

@@ -18,6 +18,7 @@ public class V_Comrade : V_UIElement
 	new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 	}
 	IEnumerator Start()
 	{

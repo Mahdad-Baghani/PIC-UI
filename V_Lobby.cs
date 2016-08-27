@@ -31,6 +31,7 @@ public class V_Lobby : V_UIElement
 	new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 		gameModePanel.SetActive(false);
 	}
 	public void OnEnterTheRoom()

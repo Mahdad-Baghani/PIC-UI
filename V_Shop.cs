@@ -4,9 +4,7 @@ using System.Collections;
 // using System.Collections.Generic;
 public class V_Shop : V_UIElement 
 {
-	// UI manager
-	// V_UIController UIController;
-
+	// fields
 	[SpaceAttribute(5f)]
 	[HeaderAttribute("Shop Items and categories")]
 	[SpaceAttribute(10f)]
@@ -39,24 +37,15 @@ public class V_Shop : V_UIElement
 			_compareeItem = value; 
 			if (_compareeItem != _selectedItem)
 			{
-				CompareItems(_selectedItem, _compareeItem); // else {StopComparing();}
+				CompareItems(_selectedItem, _compareeItem); 
 			}
 		}
 	}
-   
-
-	// public List<V_ShopItem> pistolShopList; // !!!
-	// public List<V_ShopItem> assaultShopList;
-	// public List<V_ShopItem> upperBodyShopList;
-	// public List<V_ShopItem> lowerBodyShopList;
-	// public List<V_ShopItem> headShopList;
 
 	[HeaderAttribute("Shop Buttons")]
 	[SpaceAttribute(10f)]
 	public Button weaponBtn;
-	public Button gearsBtn;
-	public Button characterBtn;
-	public Button specialItemsBtn;
+	public Button gearsBtn, characterBtn, specialItemsBtn;
 
 	[SpaceAttribute(5f)]
 	public Button buyCreditBtn;
@@ -71,8 +60,7 @@ public class V_Shop : V_UIElement
 	[SpaceAttribute(5f)]
 	// gearButtons
 	public Button upperBodyBtn;
-	public Button loweBodyBtn;
-	public Button headBtn;
+	public Button loweBodyBtn, headBtn;
 	
 	[SpaceAttribute(5f)]
 	// SpecialItems Buttons
@@ -83,9 +71,7 @@ public class V_Shop : V_UIElement
 	[HeaderAttribute("Shop Panels")]
 	[SpaceAttribute(10f)]
 	public GameObject weaponsPanel;
-	public GameObject gearsPanel;
-	public GameObject charactersPanel;
-	public GameObject specialItemsPanel;
+	public GameObject gearsPanel, charactersPanel, specialItemsPanel;
 
 	[HeaderAttribute("Shop subPanels")]
 	[SpaceAttribute(10f)]
@@ -96,8 +82,7 @@ public class V_Shop : V_UIElement
 	[SpaceAttribute(5f)]
 	// Gears
 	public GameObject upperBodyPanel;
-	public GameObject lowerBodyPanel;
-	public GameObject headPanel;
+	public GameObject lowerBodyPanel, headPanel;
 
 	[SpaceAttribute(5f)]
 	// SpecialItems
@@ -114,8 +99,7 @@ public class V_Shop : V_UIElement
 	[SpaceAttribute(5f)]
 	// comparison between items
 	public GameObject weaponComp;
-	public GameObject gearComp;
-	public GameObject characterComp;
+	public GameObject gearComp, characterComp;
 	private V_WeaponComparison weaponComparer; //!!
 	private V_GearComparison gearComparer;
 	private V_CharacterComparison characterComparer;
@@ -133,7 +117,6 @@ public class V_Shop : V_UIElement
 	public new void Awake()
 	{
 		base.Awake();
-
 		try
 		{
 			weaponComparer = weaponComp.GetComponent<V_WeaponComparison>();
@@ -188,10 +171,11 @@ public class V_Shop : V_UIElement
 
 
 	}
-	public new void OnEnable()
+	new void OnEnable()
 	{
 		// hiding inherited OnEnable from V_UIElement
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 
 		// initializing main panels
 		weaponsPanel.SetActive(true);
@@ -280,14 +264,14 @@ public class V_Shop : V_UIElement
 	private void CompareItems(V_ShopItem item1, V_ShopItem item2 = null)
     {
 		
-		if (item1 == null ) // ||item1.itemType != item2.itemType)
+		if (item1 == null ) // if so, there has been an error
 		{
 			print("V_Shop: CompareItems(): Cannot compare Items");
 			return;
 		}	
 		if (item2 != null)
 		{
-			if(item1.itemType != item2.itemType)
+			if(item1.itemType != item2.itemType) // prevent comparing 2 items from the different types
 			{
 				return;
 			}
@@ -326,13 +310,12 @@ public class V_Shop : V_UIElement
     }
 	private void StopComparing()
 	{
-		print("StopComparing");
 		weaponComp.SetActive(false);
 		gearComp.SetActive(false);
 		characterComp.SetActive(false);
 	}
 
-	protected void CompareWeapon(V_ShopItem item1, V_ShopItem item2)
+	void CompareWeapon(V_ShopItem item1, V_ShopItem item2)
 	{
 		tmpWeapon1 = item1.itemPrfb.GetComponent<V_Weapon>();
 
