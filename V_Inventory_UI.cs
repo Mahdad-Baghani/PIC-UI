@@ -5,10 +5,11 @@ using System.Collections.Generic;
 [RequireComponent(typeof(V_InventoryItems))]
 public class V_Inventory_UI : V_UIElement
 {
+	public const int MAX_NUM_FOR_WEAPON_SLUTS = 6;
 	// fields
-	List<V_InventoryItem> inGamePistols;
-	List<V_InventoryItem> inGameRifles;
-	List<V_InventoryItem> inGameRifles_secondary;
+	[SerializeField] List<V_InventoryItem> inGamePistols;
+	[SerializeField] List<V_InventoryItem> inGameRifles;
+	[SerializeField] List<V_InventoryItem> inGameRifles_secondary;
 	
 
 	public V_InventoryItems inventoryItems;
@@ -74,7 +75,7 @@ public class V_Inventory_UI : V_UIElement
 
 	public Button WeaponsBtn;
 	public Button GearsBtn, CharactersBtn;
-	public Button inGamePistolsBtn, inGameAssaultBtn, inGameSecAssaultBtn, inGameGerenadeBtn, inGameMeleeBtn;
+	public Button inGamePistolsBtn, inGameRifleBtn, inGameSecRifleBtn, inGameGerenadeBtn, inGameMeleeBtn;
 
 	[HeaderAttribute("Inventory sub Buttons")]
 	[SpaceAttribute(10f)]
@@ -96,7 +97,7 @@ public class V_Inventory_UI : V_UIElement
 	// weapons
 	public GameObject pistolPanel;
 	public GameObject assaultPanel;
-	public GameObject inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel, inGameMeleePanel;
+	public GameObject inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel, inGameMeleePanel;
 
 	[SpaceAttribute(10f)]
 	// gears
@@ -123,7 +124,7 @@ public class V_Inventory_UI : V_UIElement
 	public new void Awake()
 	{
 		base.Awake();
-		inventoryItems = GetComponent<V_InventoryItems>();
+		// inventoryItems = GetComponent<V_InventoryItems>();
 
 		inGamePistols = new List<V_InventoryItem>();
 		inGameRifles  = new List<V_InventoryItem>();
@@ -170,29 +171,180 @@ public class V_Inventory_UI : V_UIElement
 		UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
 
 		// equipped Items
-		UIController.IfClick_GoTo(inGamePistolsBtn, ()=> UIController.Enable_DisableUI(inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel,inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameSecAssaultBtn, ()=> UIController.Enable_DisableUI(inGameAssaultPanel, inGamePistolPanel, inGameSecAssaultPanel, inGameGerenadePanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameSecAssaultBtn, ()=> UIController.Enable_DisableUI(inGameSecAssaultPanel, inGamePistolPanel, inGameAssaultPanel, inGameGerenadePanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameGerenadeBtn, ()=> UIController.Enable_DisableUI(inGameGerenadePanel, inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameMeleeBtn, ()=> UIController.Enable_DisableUI(inGameMeleePanel, inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel));
+		UIController.IfClick_GoTo(inGamePistolsBtn, ()=> UIController.Enable_DisableUI(inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel,inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameSecRifleBtn, ()=> UIController.Enable_DisableUI(inGameRiflePanel, inGamePistolPanel, inGameSecRiflePanel, inGameGerenadePanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameSecRifleBtn, ()=> UIController.Enable_DisableUI(inGameSecRiflePanel, inGamePistolPanel, inGameRiflePanel, inGameGerenadePanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameGerenadeBtn, ()=> UIController.Enable_DisableUI(inGameGerenadePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameMeleeBtn, ()=> UIController.Enable_DisableUI(inGameMeleePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel));
 	}
 
-	public void AddToInGameInventory(V_InventoryItem item)
+	public void AddToInGameInventory(ref V_InventoryItem item)
 	{
+		switch (item.itemType)
+		{
+			case ItemTypes.W_PISTOL:
+				AddPistolToInGamePistols(item);
+				break;
 
+			case ItemTypes.W_ASSAULT:
+				Debug.LogAssertion("item is a rifle " + item.name);
+				if(inGameRiflePanel.activeSelf)
+				{
+					AddRifleToInGameRifles(item);
+				}
+				else if (inGameSecRiflePanel.activeSelf)
+				{
+					AddSecRifleToInGameRifles(item);
+				}	
+				else
+				{
+					UIController.ThrowError("V_Inventory_UI: AddToInGameInventory: Cannot add rifle to either primary or secondary group!" 
+											+ "somethin wrong with item settign", UIController.CloseError);
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+	private void AddPistolToInGamePistols(V_InventoryItem item)
+	{
+		bool successfulOperation = false;
+		while(inGamePistols.Count < MAX_NUM_FOR_WEAPON_SLUTS)
+		{
+			inGamePistols.Add(null);
+		}
+		// checking for empty space in inGamePistols
+		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		{
+			if (inGamePistols[i] = null)
+			{
+				item.isAnInGameItem = true;
+				inGamePistols.Add(item);
+				successfulOperation = true;
+				break;
+			}
+		}
+		if (!successfulOperation)
+		{
+			//#revision: notify the player that you cannot add this item to inGames; 
+		}
 	}
 
-	public void EquipPistol(V_InventoryItem pistol)
+	private void AddRifleToInGameRifles(V_InventoryItem item)
 	{
+		bool successfulOperation = false;
+		while(inGameRifles.Count < MAX_NUM_FOR_WEAPON_SLUTS)
+		{
+			inGameRifles.Add(null);
+		}
+		// checking for empty space in inGameRifles
+		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		{
+			if (inGameRifles[i] = null)
+			{
+				item.isAnInGameItem = true;
+				inGameRifles.Add(item);
+				successfulOperation = true;
+				break;
+			}
+		}
+		if (!successfulOperation)
+		{
+			//#revision: notify the player that you cannot add this item to inGames; 
+		}
+	}
+	private void AddSecRifleToInGameRifles(V_InventoryItem item)
+	{
+		bool successfulOperation = false;
+		while(inGameRifles_secondary.Count < MAX_NUM_FOR_WEAPON_SLUTS)
+		{
+			inGameRifles_secondary.Add(null);
+		}
+		// checking for empty space in inGameRifles_secondary
+		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		{
+			if (inGameRifles_secondary[i] = null)
+			{
+				item.isAnInGameItem = true;
+				inGameRifles_secondary.Add(item);
+				successfulOperation = true;
+				break;
+			}
+		}
+		if (!successfulOperation)
+		{
+			//#revision: notify the player that you cannot add this item to inGames; 
+		}
 
 	}
-	public void EquipAssault(V_InventoryItem assault)
+	public void EquipItem(ref V_InventoryItem item)
 	{
+		switch (item.itemType)
+		{
+			case ItemTypes.W_PISTOL:
+				EquipPistol(item, true);
+				break;
 
+			case ItemTypes.W_ASSAULT:
+				if(inGameRiflePanel.activeInHierarchy)
+				{
+					EquipAssault(item, true);
+				}
+				else if (inGameSecRiflePanel.activeInHierarchy)
+				{
+					EquipAssault_secondary(item, true);
+				}	
+				else
+				{
+					UIController.ThrowError("V_Inventory_UI: EquipItem: Cannot set rifle to either primary or secondary group!" 
+											+ "somethin wrong with item settign", UIController.CloseError);
+				}
+				break;
+
+			default:
+				break;
+		}
 	}
-	public void EquipAssault_secondary(V_InventoryItem assault_sec)
+	public void UnEquipItem(ref V_InventoryItem item)
 	{
+		switch (item.itemType)
+		{
+			case ItemTypes.W_PISTOL:
+				EquipPistol(item, false);
+				break;
 
+			case ItemTypes.W_ASSAULT:
+				if(inGameRiflePanel.activeInHierarchy)
+				{
+					EquipAssault(item, false);
+				}
+				else if (inGameSecRiflePanel.activeInHierarchy)
+				{
+					EquipAssault_secondary(item, false);
+				}
+				else
+				{
+					UIController.ThrowError("V_Inventory_UI: UnEquipItem: Cannot set rifle to either primary or secondary group!" 
+											+ "somethin wrong with item settign", UIController.CloseError);
+				}	
+				break;
+
+			default:
+				break;
+		}
+	}
+	private void EquipPistol(V_InventoryItem pistol, bool equipped)
+	{
+		pistol.isEquipped = equipped;
+	}
+	private void EquipAssault(V_InventoryItem assault, bool equipped)
+	{
+		assault.isEquipped = equipped;
+	}
+	private void EquipAssault_secondary(V_InventoryItem assault_sec, bool equipped)
+	{
+		assault_sec.isEquipped = equipped;
 	}
 	public new void OnEnable()
 	{

@@ -14,16 +14,20 @@ public class V_ObjectPool : MonoBehaviour
 
 	private void FillPool()
 	{
-		for (int i = 0; i < objectsToAdd.Length; i++)
+		// pool = new Dictionary<string, GameObject>();
+		if (pool.Count == 0)
 		{
-			// check for duplicate items
-			if (!pool.ContainsKey(objectsToAdd[i].name))
+			for (int i = 0; i < objectsToAdd.Length; i++)
 			{
-				pool.Add(objectsToAdd[i].name, objectsToAdd[i]);
-				// print(objectsToAdd[i].name);
+				// check for duplicate items
+				if (!pool.ContainsKey(objectsToAdd[i].name))
+				{
+					pool.Add(objectsToAdd[i].name, objectsToAdd[i]);
+					// print(objectsToAdd[i].name);
+				}
 			}
+			print ("V_ObjectPool: FillPool: pool count is " + pool.Count);
 		}
-		print ("V_ObjectPool: FillPool: pool count is " + pool.Count);
 	}
 
 	public GameObject GetItem(string itemName)
@@ -31,7 +35,8 @@ public class V_ObjectPool : MonoBehaviour
 		// print("Getting Item");
 		if (pool == null)
 		{
-			print("V_ObjectPool: GetItem: pool is null! do somethin about it.");
+			print("V_ObjectPool: GetItem: pool was null! trying to FillPool again!");
+			FillPool();
 		}
 		if (pool.ContainsKey(itemName))
 		{

@@ -14,10 +14,13 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
 
     // buttons and UI refs
+    public GameObject inGamePanel;
+    public bool isAnInGameItem = false, isEquipped = false;
     public Image icon;
     public Button donateBtn, deleteBtn, customizeBtn;
     public Text itemNameTxt, timeTxt;
     public Image level;
+
 
 
     // Double click vars
@@ -128,6 +131,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             return;
         }        
         mouseClickStarted = true;
+        // checking for double clicks, and calling 1. adding to ingames, 2. equippingItem, 3. deleting from ingames
         StartCoroutine(OnDoubleClick());
         
         if (data.button == PointerEventData.InputButton.Left)
@@ -140,19 +144,35 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         }
 
     }
-    public virtual void OnPointerExit(PointerEventData data)
-    {
-        // Inventory.compareeItem = null;
-    }
     IEnumerator OnDoubleClick()
     {
         yield return new WaitForSeconds(mouseDoubleClickLimit);
         if (mouseClickNumber > 1)
         {
-            print("Equipped with " + this.itemPrfb.name);
+            V_InventoryItem tmpItem = this;
+            if (isAnInGameItem && !isEquipped)
+            {
+                Inventory.EquipItem(ref tmpItem);
+                Debug.LogAssertion("Equipped item " + this.name);
+            }
+            else if (isAnInGameItem && isEquipped)
+            {
+                Inventory.UnEquipItem(ref tmpItem);
+                Debug.LogAssertion("Unequipped item " + this.name);
+            }
+            else if (!isAnInGameItem)
+            {
+                Inventory.AddToInGameInventory(ref tmpItem);
+                Debug.LogAssertion("added item " + this.name + " to inventory");
+            }
+            // print("Equipped with " + this.itemPrfb.name);
         }
         mouseClickStarted = false;
         mouseClickNumber = 0;
+    }
+    public virtual void OnPointerExit(PointerEventData data)
+    {
+        // Inventory.compareeItem = null;
     }
 
     public virtual void OnSelect(BaseEventData data)
