@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
 using UnityEngine.EventSystems;
-
+using System.Collections;
 public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
 {
     // fileds
@@ -10,49 +9,27 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
     public ItemTypes itemType;
     public ItemClass itemClass;
-    public Sprite icon;
+    public float itemTime;
     public GameObject itemPrfb;
 
-    // buttons
-    public Button donateBtn;
-    public Button deleteBtn;
-    public Button customizeBtn;
-    public Text itemNameTxt;
-    public Image level;
-    public Text timeTxt;
 
+    // buttons and UI refs
+    public Image icon;
+    public Button donateBtn, deleteBtn, customizeBtn;
+    public Text itemNameTxt, timeTxt;
+    public Image level;
+
+
+    // Double click vars
+    bool mouseClickStarted = false;
+    int mouseClickNumber = 0;
+    [SerializeField] float mouseDoubleClickLimit = .25f; // tweak from inspector
 
     // methods
     public new void Awake()
     {
         base.Awake();
         Inventory = FindObjectOfType<V_Inventory_UI>();
-
-        switch (itemClass)
-        {
-            case ItemClass.WEAPON:
-                icon = itemPrfb.GetComponent<V_Weapon>().icon;
-                itemNameTxt.text = itemPrfb.GetComponent<V_Weapon>().name;
-                timeTxt.text = itemPrfb.GetComponent<V_Weapon>().lifeTime.ToString();
-
-                break;
-
-            case ItemClass.GEAR:
-                icon = itemPrfb.GetComponent<V_Gear>().icon;
-                itemNameTxt.text = itemPrfb.GetComponent<V_Gear>().name;
-                // #revision: does Gear have lifeTime?
-                // timeTxt.text = itemPrfb.GetComponent<V_Gear>().lifeTime.ToString();
-
-                break;
-
-            case ItemClass.CHARACTER:
-                // icon = itemPrfb.GetComponent<V_Character>().icon;
-                break;
-
-            default:
-                UIController.ThrowError("V_InventoryItem: Item type is not set properly", UIController.CloseError);
-                break;
-        }
 
         UIController.IfClick_GoTo(donateBtn, ()=> Inventory.DonateItem(this));
         // #revision: Save the deleted item so it doesnt show up anymore
@@ -61,6 +38,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             UIController.AskYesNoQ("Do you want to delete this item?",
             () =>
             {
+                // #revision
                 Destroy(this.gameObject);
                 UIController.CloseYesNoQ();
             },
@@ -75,6 +53,57 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             // UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
         }
     }
+    new void OnEnable()
+    {
+        // do not call base.OnEnable on this type of objects, so we keep it seperate from UI panels which need to call base.OnEnable() while hiding it
+    }
+
+    public void Initialize(GameObject prfb)
+    {
+        // #revision: big revision!!! 
+        itemPrfb = prfb;
+        V_Weapon someWeapon = itemPrfb.GetComponent<V_Weapon>();
+        if (someWeapon)
+        {
+            if(itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.rifle)
+            {
+                itemClass = ItemClass.WEAPON;
+                itemType = ItemTypes.W_ASSAULT;
+            }
+            if(itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.pistol)
+            {
+                itemClass = ItemClass.WEAPON;
+                itemType = ItemTypes.W_PISTOL;
+            }
+
+
+            switch (itemClass)
+            {
+                case ItemClass.WEAPON:
+                    icon.sprite = itemPrfb.GetComponent<V_Weapon>().icon;
+                    itemNameTxt.text = itemPrfb.GetComponent<V_Weapon>().name;
+                    timeTxt.text = itemPrfb.GetComponent<V_Weapon>().lifeTime.ToString();
+
+                    break;
+
+                case ItemClass.GEAR:
+                    icon.sprite = itemPrfb.GetComponent<V_Gear>().icon;
+                    itemNameTxt.text = itemPrfb.GetComponent<V_Gear>().name;
+                    // #revision: does Gear have lifeTime?
+                    // timeTxt.text = itemPrfb.GetComponent<V_Gear>().lifeTime.ToString();
+
+                    break;
+
+                case ItemClass.CHARACTER:
+                    // icon = itemPrfb.GetComponent<V_Character>().icon;
+                    break;
+
+                default:
+                    UIController.ThrowError("V_InventoryItem: Item type is not set properly", UIController.CloseError);
+                    break;
+            }
+        }
+    }
     public virtual void OnPointerEnter(PointerEventData data)
     {
         if (Inventory.selectedItem == null)
@@ -87,12 +116,20 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         }
         else
         {
-            Inventory.selectedItem = null;
+            Inventory.compareeItem = null;
         }
-
     }
     public virtual void OnPointerDown(PointerEventData data)
     {
+        // detecting Double click
+        mouseClickNumber++;
+        if (mouseClickStarted)
+        {
+            return;
+        }        
+        mouseClickStarted = true;
+        StartCoroutine(OnDoubleClick());
+        
         if (data.button == PointerEventData.InputButton.Left)
         {
             EventSystem.current.SetSelectedGameObject(gameObject, data);
@@ -101,10 +138,21 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         {
             Inventory.compareeItem = null;
         }
+
     }
     public virtual void OnPointerExit(PointerEventData data)
     {
         // Inventory.compareeItem = null;
+    }
+    IEnumerator OnDoubleClick()
+    {
+        yield return new WaitForSeconds(mouseDoubleClickLimit);
+        if (mouseClickNumber > 1)
+        {
+            print("Equipped with " + this.itemPrfb.name);
+        }
+        mouseClickStarted = false;
+        mouseClickNumber = 0;
     }
 
     public virtual void OnSelect(BaseEventData data)

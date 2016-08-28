@@ -1,10 +1,18 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
+[RequireComponent(typeof(V_InventoryItems))]
 public class V_Inventory_UI : V_UIElement
 {
 	// fields
+	List<V_InventoryItem> inGamePistols;
+	List<V_InventoryItem> inGameRifles;
+	List<V_InventoryItem> inGameRifles_secondary;
+	
+
+	public V_InventoryItems inventoryItems;
+
 	[SerializeField] private V_InventoryItem _selectedItem;
 	public V_InventoryItem selectedItem
 	{
@@ -24,29 +32,6 @@ public class V_Inventory_UI : V_UIElement
 			 }
 		}
 	}
-
-    private void HideUpgrades()
-    {
-        throw new NotImplementedException();
-    }
-
-    private void ShowUpgrades(V_InventoryItem item)
-    {
-        if (item.itemClass != ItemClass.WEAPON)
-		{
-			return;
-		}
-		weaponUpgradePanel.SetActive(true);
-		// foreach (V_UpgardeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
-		// {
-		// 	GameObject tmpObj = UIController.emptyObjectWithImage;
-		// 	// tmpObj.AddComponent<Image>();
-		// 	tmpObj.GetComponent<Image>().sprite = upgrade.icon;
-		// 	tmpObj.transform.SetParent(weaponUpgradePanel.transform ,false);		
-		// }
-		throw new NotImplementedException();
-    }
-
     [SerializeField] private V_InventoryItem _compareeItem;
 	public V_InventoryItem compareeItem
 	{
@@ -61,44 +46,57 @@ public class V_Inventory_UI : V_UIElement
 		}
 	}
 
+    private void HideUpgrades()
+    {
+        // throw new NotImplementedException();
+    }
+
+    private void ShowUpgrades(V_InventoryItem item)
+    {
+        if (item.itemClass != ItemClass.WEAPON)
+		{
+			return;
+		}
+		// weaponUpgradePanel.SetActive(true);
+		// foreach (V_UpgardeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
+		// {
+		// 	GameObject tmpObj = UIController.emptyObjectWithImage;
+		// 	// tmpObj.AddComponent<Image>();
+		// 	tmpObj.GetComponent<Image>().sprite = upgrade.icon;
+		// 	tmpObj.transform.SetParent(weaponUpgradePanel.transform ,false);		
+		// }
+		// throw new NotImplementedException();
+    }
+
+
 	[HeaderAttribute("Inventory main Buttons")]
 	[SpaceAttribute(10f)]
 
 	public Button WeaponsBtn;
-	public Button GearsBtn;
-	public Button CharactersBtn;
-
-	public Button eqPistolsBtn;
-	public Button eqRifle1Btn;
-	public Button eqRifle2Btn;
-	public Button eqGerenadeBtn;
-	public Button eqMeleeBtn;
+	public Button GearsBtn, CharactersBtn;
+	public Button inGamePistolsBtn, inGameAssaultBtn, inGameSecAssaultBtn, inGameGerenadeBtn, inGameMeleeBtn;
 
 	[HeaderAttribute("Inventory sub Buttons")]
 	[SpaceAttribute(10f)]
 	public Button pistolsBtn;
-	public Button assaultsBtn;
-	public Button gerenadesBtn;
-	public Button meleesBtn;
+	public Button assaultsBtn, gerenadesBtn, meleesBtn;
 
 	[SpaceAttribute(10f)]
 	public Button upperBodyBtn;
-	public Button lowerBodyBtn;
-	public Button headBtn;
+	public Button lowerBodyBtn, headBtn;
 	
 	
 	[HeaderAttribute("Inventory Panels")]
 	[SpaceAttribute(10f)]
 	public GameObject  weaponPanel;
-	public GameObject gearPanel;
-	public GameObject charactersPanel;
-	public GameObject weaponUpgradePanel;
+	public GameObject gearPanel, charactersPanel, weaponUpgradePanel;
 
 	[HeaderAttribute("Inventory sub Panels")]
 	[SpaceAttribute(10f)]
 	// weapons
 	public GameObject pistolPanel;
 	public GameObject assaultPanel;
+	public GameObject inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel, inGameMeleePanel;
 
 	[SpaceAttribute(10f)]
 	// gears
@@ -109,9 +107,9 @@ public class V_Inventory_UI : V_UIElement
 	[HeaderAttribute("References")]
 	[SpaceAttribute(10f)]
 
-	[SerializeField] protected GameObject weaponComp;
-	[SerializeField] public GameObject gearComp;
-	[SerializeField] public GameObject characterComp;
+	public GameObject weaponComp;
+	public GameObject gearComp;
+	public GameObject characterComp;
 	V_WeaponComparison weaponComparer;
 	V_GearComparison gearComparer;
 	V_CharacterComparison characterComparer;
@@ -125,6 +123,12 @@ public class V_Inventory_UI : V_UIElement
 	public new void Awake()
 	{
 		base.Awake();
+		inventoryItems = GetComponent<V_InventoryItems>();
+
+		inGamePistols = new List<V_InventoryItem>();
+		inGameRifles  = new List<V_InventoryItem>();
+		inGameRifles_secondary = new List<V_InventoryItem>();
+
 		try
 		{
 			weaponComparer = weaponComp.GetComponent<V_WeaponComparison>();
@@ -159,19 +163,41 @@ public class V_Inventory_UI : V_UIElement
 
 		UIController.IfClick_GoTo(pistolsBtn, () => UIController.Enable_DisableUI(pistolPanel, assaultPanel));
 		UIController.IfClick_GoTo(assaultsBtn, () => UIController.Enable_DisableUI(assaultPanel, pistolPanel));
-		// UIController.IfClick_GoTo(gerenadesBtn, () => UIController.Enable_DisableUI(gerenadePanel, pistolPanel, assaultPanel, meleePanel));
-		// UIController.IfClick_GoTo(meleesBtn, () => UIController.Enable_DisableUI(meleePanel, pistolPanel, assaultPanel, gerenadePanel));
-		
+
 		// sub buttons: Gears
 		UIController.IfClick_GoTo(upperBodyBtn, () => UIController.Enable_DisableUI(upperBodyPanel, lowerBodyPanel, headPanel));
 		UIController.IfClick_GoTo(lowerBodyBtn, () => UIController.Enable_DisableUI(lowerBodyPanel, upperBodyPanel, headPanel));
 		UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
 
+		// equipped Items
+		UIController.IfClick_GoTo(inGamePistolsBtn, ()=> UIController.Enable_DisableUI(inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel,inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameSecAssaultBtn, ()=> UIController.Enable_DisableUI(inGameAssaultPanel, inGamePistolPanel, inGameSecAssaultPanel, inGameGerenadePanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameSecAssaultBtn, ()=> UIController.Enable_DisableUI(inGameSecAssaultPanel, inGamePistolPanel, inGameAssaultPanel, inGameGerenadePanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameGerenadeBtn, ()=> UIController.Enable_DisableUI(inGameGerenadePanel, inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameMeleePanel));
+		UIController.IfClick_GoTo(inGameMeleeBtn, ()=> UIController.Enable_DisableUI(inGameMeleePanel, inGamePistolPanel, inGameAssaultPanel, inGameSecAssaultPanel, inGameGerenadePanel));
 	}
 
+	public void AddToInGameInventory(V_InventoryItem item)
+	{
+
+	}
+
+	public void EquipPistol(V_InventoryItem pistol)
+	{
+
+	}
+	public void EquipAssault(V_InventoryItem assault)
+	{
+
+	}
+	public void EquipAssault_secondary(V_InventoryItem assault_sec)
+	{
+
+	}
 	public new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 		
 		weaponPanel.SetActive(true);
 		gearPanel.SetActive(false);
@@ -181,6 +207,40 @@ public class V_Inventory_UI : V_UIElement
 		gearComp.SetActive(false);
 		characterComp.SetActive(false);
 
+		ListItems();
+	}
+	public void ListItems()
+	{
+
+		foreach (GameObject item in inventoryItems.GetList())
+		{
+			switch (item.GetComponent<V_InventoryItem>().itemType)
+			{
+				case ItemTypes.W_PISTOL:
+				item.transform.SetParent(pistolPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.W_ASSAULT:
+				item.transform.SetParent(assaultPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_UPPERBODY:
+				item.transform.SetParent(upperBodyPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_LOWERBODY:
+				item.transform.SetParent(lowerBodyPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				case ItemTypes.G_HEAD:
+				item.transform.SetParent(headPanel.GetComponentInChildren<GridLayoutGroup>().gameObject.transform, false);
+				break;
+
+				default:
+				UIController.ThrowError("UInitialized gameObject: " + item.name, UIController.CloseError);
+				break;
+			}
+		}
 	}
 
 	public void DonateItem(V_InventoryItem item)
@@ -199,11 +259,20 @@ public class V_Inventory_UI : V_UIElement
 
 	protected void CompareItems(V_InventoryItem item1, V_InventoryItem item2 = null)
 	{
+		// if so, there has been an error
 		if (item1 == null)
 		{
 			print("V_Inventory_UI: CompareItems(): Cannot compare Items");
 			return;
-		}		
+		}	
+		if (item2 != null)
+		{
+			// prevent comparing 2 items from the different types
+			if (item1.itemType != item2.itemType)
+			{
+				return;
+			}
+		} 
 		switch (item1.itemType)
 		{
 			case ItemTypes.W_PISTOL:
@@ -235,24 +304,21 @@ public class V_Inventory_UI : V_UIElement
 			break;
 		}
 	}
-
 	protected void StopComparing()
 	{
 		weaponComp.SetActive(false);
 		gearComp.SetActive(false);
 		characterComp.SetActive(false);
 	}
-
-	protected void CompareWeapon(V_InventoryItem item1, V_InventoryItem item2)
+	void CompareWeapon(V_InventoryItem item1, V_InventoryItem item2)
 	{
 		tmpWeapon1 = item1.itemPrfb.GetComponent<V_Weapon>();
 
 		if (tmpWeapon1 == null)
 		{
-			UIController.ThrowError("V_Inventory_UI: CompareWeapon(): Cannot Find a ShopItem reference", UIController.CloseError);
+			UIController.ThrowError("V_Inventory_UI: CompareWeapon(): Cannot Find a inventoryItem reference", UIController.CloseError);
 			return;
 		}
-
 		UIController.Enable_DisableUI(weaponComp, gearComp, characterComp);
 		// if we have just the first Item, we wanna show its detail, but not compare it to anaother item
 		if (item2 == null)
@@ -271,8 +337,6 @@ public class V_Inventory_UI : V_UIElement
 			weaponComparer.fireRate_secondItem.gameObject.SetActive(false);
 			weaponComparer.weight_secondItem.gameObject.SetActive(false);
 		}
-
-
 		else if (item2 != null)
 		{
 			weaponComparer.accuracy_secondItem.gameObject.SetActive(true);
@@ -288,7 +352,6 @@ public class V_Inventory_UI : V_UIElement
 			StartCoroutine(UIController.FillSlider(weaponComparer.fireRate_secondItem, tmpWeapon2.fireRate / 100f));
 			StartCoroutine(UIController.FillSlider(weaponComparer.weight_secondItem, tmpWeapon2.weight / 100f));
 		}
-
 	}
 	protected void CompareGear(V_InventoryItem item1, V_InventoryItem item2)
 	{
@@ -310,7 +373,7 @@ public class V_Inventory_UI : V_UIElement
 		else if (item2 != null)
 		{
 			gearComparer.shield_secondItem.gameObject.SetActive(true);
-			tmpGear2 = item2.itemPrfb.GetComponent<V_Gear>();
+			tmpGear2 = item2.GetComponent<V_Gear>();
 			StartCoroutine(UIController.FillSlider(gearComparer.shield_secondItem, tmpGear2.shield));
 		}
 	}

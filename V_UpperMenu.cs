@@ -1,106 +1,26 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-public class V_UpperMenu : MonoBehaviour
+public class V_UpperMenu : V_UIElement
 {
-	V_UIController UIController;
 
-	[SerializeField]
-	Button backButton;
-
-	[SerializeField]
-	Button settingsButton;
-
-	[SerializeField]
-	Button clanButton;
-
-	[SerializeField]
-	Button comradeButton;
-
-	[SerializeField]
-	Button shopButton;
-
-	[SerializeField]
-	Button inventoryButton;
-
-	[SerializeField]
-	Button gachaponButton;
-
-	[SerializeField]
-	Button myInfoButton;
+	[SerializeField] Button settingsButton, clanButton, comradeButton, shopButton, inventoryButton, gachaponButton, myInfoButton;
 	
 
-	void Awake()
+	new void Awake()
 	{
-		// #revision
-		UIController = FindObjectOfType<V_UIController>();
-		UIController.IfClick_GoTo(backButton, Back);
-		// #revision and so on....
-		// UIController.IfClick_GoTo(settingsButton, Settings);
-		// UIController.IfClick_GoTo(clanButton, Clan);
-		// UIController.IfClick_GoTo(comradeButton, Comrade);
-		// UIController.IfClick_GoTo(shopButton, Shop);
-		// UIController.IfClick_GoTo(inventoryButton, Inventory);
-		// UIController.IfClick_GoTo(gachaponButton, Gachapon);
-		// UIController.IfClick_GoTo(myInfoButton, MyInfo);
-
+		base.Awake();
+		// UIController.IfClick_GoTo(UIController.backButton, Back);
+		UIController.IfClick_GoTo(settingsButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("SettingPanel")));
+		// UIController.IfClick_GoTo(clanButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("ClanPanel")));
+		UIController.IfClick_GoTo(comradeButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("ComradePanel")));
+		UIController.IfClick_GoTo(shopButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("ShopPanel")));
+		UIController.IfClick_GoTo(inventoryButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("InventoryPanel")));
+		// UIController.IfClick_GoTo(gachaponButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("GachaponPanel")));
+		UIController.IfClick_GoTo(myInfoButton, ()=> UIController.GoFrom_To(UIController.currentPanel, GameObject.FindGameObjectWithTag("MyInfoPanel")));
 	}
 
-	void Back()
-	{
-		// go back somewhere
-		// check if the player is in lobby or somewhere else
-		// UIController.GoToNextPanel("Lobby");
-		if (UIController.currentPanel != null)
-		{
-			if (UIController.currentPanel == UIController.LobbyPanel)
-			{
-				UIController.AskYesNoQ("Do you want to quit the lobby?", 
-				() => // yes event
-				{
-					// #revision
-					Application.Quit();
-				},
-				() => // no event
-				{
-					UIController.GoFrom_To(UIController.genericYesNoModal, UIController.LobbyPanel);
-				});
-			}
-			if (UIController.currentPanel == UIController.RoomPanel)
-			{
-				
-			}
-		}
-	}
-	public void Settings()
-	{
-		// go to settings
-	}
-	void Clan()
+	new void OnEnable()
 	{
 		
 	}
-
-	void Comrade()
-	{
-		// go see my Comrade
-	}
-	void Shop()
-	{
-
-	}
-	void Inventory()
-	{
-		// go to Inventory
-	}
-	void Gachapon()
-	{
-		// go to Gachapon
-	}
-	void MyInfo()
-	{
-
-	}
-
-
-
 }

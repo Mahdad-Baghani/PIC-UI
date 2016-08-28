@@ -6,7 +6,9 @@ public class V_MyInfo : V_UIElement
 	// fields 
 	// #revision: I have to read the true reference to the local player somehow...
 	public V_PlayerTemplate playerModel;
+	private V_ObjectPool pool;
 	public V_WeaponUpgradeView upgradeView;
+	public GameObject myInfoItemPrfb;
 	
 	[HeaderAttribute("UI Panels")]
 	[SpaceAttribute(10f)]
@@ -49,6 +51,7 @@ public class V_MyInfo : V_UIElement
 		{
 			playerModel = FindObjectOfType<V_PlayerTemplate>();
 			upgradeView = FindObjectOfType<V_WeaponUpgradeView>();
+			pool = FindObjectOfType <V_ObjectPool>();
 		}
 		catch (System.Exception err)
 		{
@@ -67,6 +70,7 @@ public class V_MyInfo : V_UIElement
 	public new void OnEnable()
 	{
 		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 		try
 		{
 			badgeImage.sprite = playerModel.badge.badgeIcon;
@@ -76,7 +80,7 @@ public class V_MyInfo : V_UIElement
 			{
 				clanLogo.transform.parent.gameObject.SetActive(true);
 				clanLogo.sprite = playerModel.clan.logo;
-				clanName.text = playerModel.clan.name;
+				clanName.text = playerModel.clan.clanName;
 			}
 			else
 			{
@@ -96,21 +100,25 @@ public class V_MyInfo : V_UIElement
 			}
 			foreach (V_Weapon weapon in playerModel.weapons)
 			{
-				GameObject tmpObj = Instantiate(weaponPrfb);
-				V_Weapon someWeapon = tmpObj.GetComponent<V_Weapon>();
-				// print("b4: " + someWeapon.name);
-				// someWeapon = new V_Weapon(weapon);
-				// print("after: " + someWeapon.name);
-				tmpObj.GetComponent<Image>().sprite = weapon.icon;
-				if (weapon.type == V_Weapon.weaponType.pistol)
+				GameObject tmpObj = Instantiate(myInfoItemPrfb);
+				// print(weapon.name);
+				GameObject item = pool.GetItem(weapon.name);
+				tmpObj.GetComponent<V_MyInfoItem>().Initialize(item);
+				switch (item.GetComponent<V_Weapon>().type)
 				{
+					case V_Weapon.weaponType.pistol:
 					tmpObj.transform.SetParent(pistolPanel.transform, false);
-				}
-				if (weapon.type == V_Weapon.weaponType.rifle)
-				{
+					break;
+
+					case V_Weapon.weaponType.rifle:
 					tmpObj.transform.SetParent(assaultPanel.transform, false);
+					break;
+					
+					default:
+					print ("V_MyInfo: OnEnable: error in defining item");
+					break;
 				}
-				tmpObj.transform.SetAsLastSibling();
+				
 			}
 
 

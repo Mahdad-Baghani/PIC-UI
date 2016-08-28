@@ -139,7 +139,7 @@ public class V_CustomLobbyManager : NetworkLobbyManager
 	void Awake () 
 	{
 		Rooms = new Dictionary<int, V_RoomTemplate>();
-		currentRoom = new V_RoomTemplate();
+		// currentRoom = new V_RoomTemplate();
 	}
 
 	void Join()

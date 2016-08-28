@@ -60,9 +60,7 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	public Text requiredScoreTxt;
 	public Text requiredChargeTxt;
 
-
 	// mehtods
-
 	public new void Awake()
 	{
 		base.Awake();
@@ -117,7 +115,8 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	}
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		StartCoroutine(UIController.FadeIn(detailPanel));
+		// StartCoroutine(UIController.FadeIn(detailPanel));
+		detailPanel.SetActive(true);
 		
 		if (Shop.selectedItem == null)
 		{
@@ -151,7 +150,8 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	public void OnPointerExit(PointerEventData eventData)
 	{
 		// Shop.compareeItem = null;
-		StartCoroutine(UIController.FadeOut(detailPanel));
+		detailPanel.SetActive(false);
+		// StartCoroutine(UIController.FadeOut(detailPanel));
 	}
 
 	public void OnSelect(BaseEventData eventData)

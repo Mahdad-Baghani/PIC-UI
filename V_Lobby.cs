@@ -1,81 +1,57 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class V_Lobby : MonoBehaviour 
+public class V_Lobby : V_UIElement 
 {
 	// fields
-	
 	// #revision
-	V_UIController UIController;
 	V_CustomLobbyManager LobbyManager;
 	
 	// panels to go from Lobby
-	[SerializeField]
-	GameObject gameModePanel;
+	public GameObject gameModePanel;
 	
 	// Buttons
 
-	[SerializeField]
-	Button enterButton;
-	
-	[SerializeField]
-	Button createRoomButton;
-	[SerializeField]
-	Button fastRoomButton;
-
-	[SerializeField]
-	Button GM_SD_Button;
-
-	[SerializeField]
-	Button GM_TMD_Button;
+	public Button enterButton, createRoomButton, fastRoomButton, GM_SD_Button, GM_TMD_Button;
 
 	private bool firstCreateTheRoom = true; // !!!
 	
-	void Awake()
+	new void Awake()
 	{
+		base.Awake();
 		// #Revision 
-		UIController = FindObjectOfType<V_UIController>();
 		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
-		// UIController = pic.controller.UIcontroller;
 
-		UIController.IfClick_GoTo(enterButton, EnterTheRoom);
-		UIController.IfClick_GoTo(createRoomButton, CreateRoom);
-		UIController.IfClick_GoTo(fastRoomButton, CreateFastRoom);	
+		UIController.IfClick_GoTo(enterButton, OnEnterTheRoom);
+		UIController.IfClick_GoTo(createRoomButton, OnCreateRoom);
+		UIController.IfClick_GoTo(fastRoomButton, OnCreateFastRoom);	
 		UIController.IfClick_GoTo(GM_SD_Button, () => {ChangeGameMode(GameModes.SD);});
 		UIController.IfClick_GoTo(GM_TMD_Button, () => {ChangeGameMode(GameModes.TDM);});
-
 	}
-	void OnEnable()
+	new void OnEnable()
 	{
-		UIController.IfClick_GoTo(UIController.backButton, () =>
-		{
-			
-		});
-
+		base.OnEnable();
+		UIController.currentPanel = this.gameObject;
 		gameModePanel.SetActive(false);
-
 	}
-
-
-
-	public void EnterTheRoom()
+	public void OnEnterTheRoom()
 	{
 		// enters the room
 		if (enterButton == null)
 		{
-			print("V_Lobby: EnterTheRoom(): enterButton is not set");
+			print("V_Lobby: OnEnterTheRoom(): enterButton is not set");
 			return;
 		}
 		
 		// Join the Room via V_CustomLobbyManager
 		// V_CustomLobbyManager.instance.GetRoom(idFromSelectedRoomInTheList~!);
 	}
-	void CreateRoom()
+	void OnCreateRoom()
 	{
 		// go to Room page
 		if (createRoomButton == null)
 		{
-			print("V_Lobby: CreateRoom(): createRoomButton is not set");
+			print("V_Lobby: OnCreateRoom(): createRoomButton is not set");
 			return;
 		}
 
@@ -85,17 +61,8 @@ public class V_Lobby : MonoBehaviour
 		}
 
 		firstCreateTheRoom = true;
-		// #revision
-		// add network Host to the player if he wants to create a room
-		// pic.model.player.addComponent<NetworkHost>;
-
-		// #revision
-		// wait for clicking one of the game modes
-
-		// UIController.GoToNextPanel(roomModal);
-		
 	}
-	void CreateFastRoom()
+	void OnCreateFastRoom()
 	{
 		// fast room creating or finding
 		if (fastRoomButton == null)
@@ -115,9 +82,6 @@ public class V_Lobby : MonoBehaviour
 	void ChangeGameMode(GameModes mode)
 	{
 		V_RoomTemplate tmpRoom = new V_RoomTemplate();
-		
-
-		// V_CustomLobbyManager.instance.Room.gameMode  =  mode;
 		tmpRoom.gameMode = mode;
 
 		if(firstCreateTheRoom)
@@ -126,7 +90,7 @@ public class V_Lobby : MonoBehaviour
 			// and then on the lobby manager
 			LobbyManager.isMasterServer = true;
 			LobbyManager.SaveRoom(tmpRoom);
-			UIController.GoFrom_To(UIController.LobbyPanel, UIController.RoomModalPanel);
+			UIController.Enable_DisableUI(UIController.RoomModalPanel);
 
 		}
 		else

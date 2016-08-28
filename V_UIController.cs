@@ -9,10 +9,13 @@ public class V_UIController : MonoBehaviour
     public static V_PlayerTemplate playerModel;
     // consts for room,
     // use this in sync with UI
+    
+    // GM: GameModes 
     public const string GM_SD = "Search and Destroy";
     public const string GM_TDM = "Team DeathMatch";
     public const string GM_DM = "DeathMatch";
 
+    // PM: PlayerModes
     public const string PM_ON1 = "1 On 1";
     public const string PM_ON2 = "2 On 2";
     public const string PM_ON3 = "3 On 3";
@@ -22,13 +25,22 @@ public class V_UIController : MonoBehaviour
     public const string PM_ON7 = "7 On 7";
     public const string PM_ON8 = "8 On 8";
 
+    // M: Maps
     public const string M_DUST = "Dust";
     public const string M_RUST = "Rust";
 
+    // WF: WeaponFilters
     public const string WF_NONE = "None";
     public const string WF_KNIFE = "Knife only";
     public const string WF_ASSAULT = "Assault only";
     public const string WF_GERENADE = "Gerenade only";
+
+    // O: Objectives
+    public const string O_DEFAULT_FOR_SD = "1";
+    public const string O_DEFAULT_FOR_DM = "30";
+
+    // T: Time
+    public const string T_DEFAULT_TIME = "2";
 
 
     // fields
@@ -42,8 +54,8 @@ public class V_UIController : MonoBehaviour
     [HeaderAttribute("UI Panels")]
     [SpaceAttribute(5f)]
     public GameObject LobbyPanel;
-    public GameObject RoomModalPanel;
-    public GameObject RoomPanel;
+    public GameObject RoomModalPanel, RoomPanel, ComradePanel, InventoryPanel, ShopPanel, MyInfoPanel, SettingPanel; 
+
     public Text toolTipBar;
 
     [SpaceAttribute(5f)]
@@ -82,7 +94,7 @@ public class V_UIController : MonoBehaviour
     {
         playerModel = FindObjectOfType<V_PlayerTemplate>();
     }
-    public void GoFrom_To (GameObject from, GameObject nextPanel)
+    public void GoFrom_To(GameObject from, GameObject nextPanel)
     {
        if (nextPanel != null && from != null)
        {           
@@ -91,6 +103,16 @@ public class V_UIController : MonoBehaviour
            currentPanel = nextPanel;
        }
     }
+    public void GoTo(GameObject nextPanel)
+    {
+        if(nextPanel != null)
+        {
+            currentPanel.SetActive(false);
+            nextPanel.SetActive(true);
+            currentPanel = nextPanel;
+        }
+    }
+    
 
     public void GoFrom_To(GameObject from, GameObject nextPanel, bool killPreviousPanel)
     {
@@ -117,7 +139,7 @@ public class V_UIController : MonoBehaviour
         }
         catch (System.Exception err)
         {
-            ThrowError(err.Message + " in ", CloseError);
+            ThrowError(err.Message, CloseError);
             throw;
         }
      
@@ -129,6 +151,8 @@ public class V_UIController : MonoBehaviour
         try
         {
             enableThis.SetActive(true);
+            if (disableThese == null) return;
+            
             foreach (GameObject obj in disableThese)
             {
                 obj.SetActive(false);
@@ -140,6 +164,28 @@ public class V_UIController : MonoBehaviour
             throw;
         }
     }
+    public void Disable_EnableUI(GameObject disableThis, params GameObject[] enableThese)
+    {
+        try
+        {
+            if (disableThis == null) 
+            {
+                ThrowError("V_UIController: Disable_EnableUI(): item to disable is null, dude", CloseError);
+            }
+            disableThis.SetActive(false);
+            if(enableThese == null) return;
+
+            foreach (GameObject obj in enableThese)
+            {
+                obj.SetActive(true);
+            }
+        }
+        catch (System.Exception err)
+        {
+            ThrowError("V_UIController: Disable_EnableUI(): " + err.Message, CloseError);
+            throw;
+        }
+    }
 
     public void OnDropDownChangesValue(Dropdown dropdown, UnityAction<int> someEvent)
     {
@@ -147,10 +193,22 @@ public class V_UIController : MonoBehaviour
         dropdown.onValueChanged.AddListener(someEvent);
     }
 
-    public void ifType_DoThis(InputField input, UnityAction eve)
+    public void OnSliderChangesValue(Slider slider, UnityAction<float> someEvent)
     {
-        input.onEndEdit.RemoveAllListeners();
-        // input.onEndEdit.AddListener(eve<string>);
+        slider.onValueChanged.RemoveAllListeners();
+        slider.onValueChanged.AddListener(someEvent);
+    }
+
+    public void ifType_DoThis(InputField input, UnityAction<string> someEvent)
+    {
+        input.onValueChanged.RemoveAllListeners();
+        input.onValueChanged.AddListener(someEvent);
+    }
+
+    public void OnToggleChangeValue (Toggle toggle, UnityAction<bool> someEvent)
+    {
+        toggle.onValueChanged.RemoveAllListeners();
+        toggle.onValueChanged.AddListener(someEvent);
     }
 
     public IEnumerator FadeIn(GameObject panel)
@@ -167,8 +225,9 @@ public class V_UIController : MonoBehaviour
             {
                 tmpRndr.SetAlpha(lerp);
                 panel.SetActive(true);
-                lerp += fadeFactor;
+                lerp += fadeFactor * Time.deltaTime;
                 yield return new WaitForSeconds(waitFactor);
+                // print(lerp);
             }  
         }
 
@@ -182,14 +241,16 @@ public class V_UIController : MonoBehaviour
             print("V_UIController: FadeOut: cannot get te CanvasRenderer on " + panel.name);
             panel.AddComponent<CanvasRenderer>();
         }
-       
-        while (lerp >= 0)
+        else   
         {
-            tmpRndr.SetAlpha(lerp);
-            lerp -= fadeFactor;
-            yield return new WaitForSeconds(fadeFactor);
+            while (lerp >= 0)
+            {
+                tmpRndr.SetAlpha(lerp);
+                lerp -= fadeFactor * Time.deltaTime;
+                yield return new WaitForSeconds(waitFactor);
+            }
+            panel.SetActive(false);
         }
-        panel.SetActive(false);
     }
     public void LoadThumbnailMaps()
     {
@@ -380,6 +441,23 @@ public class V_UIController : MonoBehaviour
         }
     }
 
+    public string ReturnGameObjectives(GameModes gm)
+    {
+        switch(gm)
+        {
+            case GameModes.SD:
+            return O_DEFAULT_FOR_SD;
+
+            case GameModes.DM:
+            return O_DEFAULT_FOR_DM;
+
+            case GameModes.TDM:
+            return O_DEFAULT_FOR_DM;
+
+            default:
+            return O_DEFAULT_FOR_SD;
+        }
+    }
     public void GetItemInDropDown(Dropdown dropdown, string item)
     {
         int tmp = 0;
@@ -452,17 +530,17 @@ public class V_UIController : MonoBehaviour
     {
         float tmp = 0f;
         slider.value = 0f;
-        int times = 10;
+        int times = 10; // just to not make the CPU too busy with simultaneous coroutines
         int time = 0;
+
         if (slider !=null)
         {
             while (true)
             {
-
                 if (time % times != 0)
                 {
                     time++;
-                    yield return null;
+                    continue;
                 }
                 time++;
                 tmp += Time.deltaTime;
@@ -473,8 +551,6 @@ public class V_UIController : MonoBehaviour
                 {
                     yield break;
                 }
-
-                // slider.value += Mathf.Lerp()
                 // print(slider.value.ToString());
                 // print(slider.name);
             }

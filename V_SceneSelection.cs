@@ -18,16 +18,17 @@ public class V_SceneSelection : MonoBehaviour
 
 	public void Load (GameObject panel)
 	{
-		if (UIController.currentPanel == UIController.RoomPanel)
-		{
-			UIController.AskYesNoQ ("Do you want to discard the Room?", 
-			() => LobbyController.RemoveRoom(LobbyController.currentRoom.ID),
-			() => this.gameObject.SetActive(false));
-		}
+		// if (UIController.currentPanel.name == UIController.RoomPanel.name)
+		// {
+		// 	print("going back from room");
+		// 	UIController.AskYesNoQ ("Do you want to discard the Room?", 
+		// 	() => LobbyController.RemoveRoom(LobbyController.currentRoom.ID),
+		// 	() => this.gameObject.SetActive(false));
+		// }
 		if (panel != null)
 		{
 			UIController.GoFrom_To(UIController.currentPanel, panel);
-			UIController.IfClick_GoTo(UIController.backButton, () => UIController.GoFrom_To(UIController.currentPanel, UIController.LobbyPanel));
+			// UIController.IfClick_GoTo(UIController.backButton, () => UIController.GoFrom_To(UIController.currentPanel, UIController.LobbyPanel));
 		}
 			
 	}

@@ -22,6 +22,5 @@ public class V_UIElement : MonoBehaviour
 		{
 			transform.parent.SetAsLastSibling();
 		}
-		UIController.currentPanel = this.gameObject;
 	}
 }
