@@ -1,21 +1,46 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-public class V_KeyboardSettingItem : V_UIElement, IPointerEnterHandler, IPointerDownHandler, IPointerExitHandler, ISelectHandler
+using System.Collections;
+public class V_KeyboardSettingItem : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
 {
-	private bool waitingForText = false;
-	public string pressedKey;
-	public string defaultKey;
-	public InputField placeholder;
-	new void Awake () 
+	public KeyCode defaultKey;
+	private KeyCode previousKey;
+	public Button placeholder;
+	Text cachedBtnTxt;
+	void Awake () 
 	{
-		base.Awake();
-		UIController.ifType_DoThis(placeholder, (value) => {if(value != "") placeholder.text = value.Substring(placeholder.text.Length-1, 1);});
+		cachedBtnTxt = GetComponentInChildren<Text>();
+		previousKey = defaultKey;
 	}
-	
-	new void OnEnable()
+	IEnumerator WaitForKey()
 	{
-		placeholder.text =  defaultKey;
+		cachedBtnTxt.text = "Press some Key";
+		while(ReadKey() == KeyCode.None)
+		{
+			yield return new WaitForFixedUpdate();
+			// print("waitingForText");
+		}
+		previousKey = ReadKey();
+		cachedBtnTxt.text = previousKey.ToString(); 
+		StopWaitingForIdiotUserToPressADamnKey();
+	}
+	KeyCode ReadKey()
+	{
+		int tmpInt = System.Enum.GetNames(typeof(KeyCode)).Length;
+		for(int i = 0; i < tmpInt; i++)
+		{
+			if(Input.GetKey((KeyCode)i))
+			{
+				return (KeyCode)i;
+			}
+		}
+		return KeyCode.None;
+	}
+	void OnEnable()
+	{
+		// #revision:: this might throw some error!!!
+		cachedBtnTxt.text = defaultKey.ToString();
 		// no need to call base.OnEnable(); cause we are not setting it as LastSibling
 	}
 	public void OnPointerEnter(PointerEventData data)
@@ -35,7 +60,17 @@ public class V_KeyboardSettingItem : V_UIElement, IPointerEnterHandler, IPointer
 	}
 	public void OnSelect(BaseEventData data)
 	{
-		placeholder.text = "";
-		// StartCoroutine()
+		StartCoroutine(WaitForKey());
+	}
+	public void OnDeselect(BaseEventData data)
+	{
+		StopWaitingForIdiotUserToPressADamnKey();
+	}
+	private void StopWaitingForIdiotUserToPressADamnKey()
+	{
+		StopCoroutine(WaitForKey());
+		StopAllCoroutines();
+		cachedBtnTxt.text = previousKey.ToString();
+		
 	}
 }

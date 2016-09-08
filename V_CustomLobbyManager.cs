@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.Networking;
+﻿using UnityEngine.Networking;
 using System.Collections.Generic;
 
 public enum PlayerModes
@@ -103,19 +102,19 @@ public class V_CustomLobbyManager : NetworkLobbyManager
 		}
 	}
 
-	public void QuickStartRoom(GameModes mode)
+	public V_RoomTemplate QuickStartRoom(GameModes mode)
 	{
 		for (int i = 0; i < Rooms.Count; i++)
 		{
 			// #revision
 			if (Rooms[i].gameMode == mode) 
 			{
-				currentRoom = Rooms[i];
-				break;
+				return Rooms[i];
 			}
 		}
 		// there was no Room with that GameModes, so
-		//  UIController.ThrowError("V_CustomLobbyManager: QuickStartRoom(): No room with your selected GameMode");
+		//  throw new System.Exception("V_CustomLobbyManager: QuickStartRoom(): No room with your selected GameMode");
+		return null;
 	}
 	public V_RoomTemplate GetRoom (int id)
 	{

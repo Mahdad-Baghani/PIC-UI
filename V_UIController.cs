@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.Events;
+using System.Collections.Generic;
 
 public class V_UIController : MonoBehaviour 
 {
@@ -472,7 +473,7 @@ public class V_UIController : MonoBehaviour
         }
     }
 
-    public void AskYesNoQ (string question, UnityAction yesAction, UnityAction noAction)
+    public void AskYesNoQuestion (string question, UnityAction yesAction, UnityAction noAction)
     {
         genericYesBtn.onClick.RemoveAllListeners();
         genericYesBtn.onClick.AddListener(yesAction);
@@ -555,5 +556,22 @@ public class V_UIController : MonoBehaviour
                 // print(slider.name);
             }
         }
+    }
+
+    public int? ReturnIndexInList<T> (List<T> list, T param)
+    {
+        int i;
+        for (i = 0; i < list.Count; i++)
+        {
+            if (list[i] == null )
+            {
+                continue;
+            }
+            if (list[i].Equals(param))
+            {
+                return i;
+            }
+        }
+        return null;
     }
 }

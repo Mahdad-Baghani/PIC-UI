@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 public enum BadgeType
 {
+	NONE = 0,
 	SOLDIER_III = 1,
 	 SOLDIER_II = 601,
-	  SOLDIER_I,
+	  SOLDIER_I = 1700,
 	   LIEUTENANT_III,
 	    LIEUTENANT_II,
 		 LIEUTENANT_I

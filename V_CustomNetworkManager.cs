@@ -15,40 +15,40 @@ public class V_CustomNetworkManager : NetworkManager
 	// [SerializeField] 
 	// GameObject PlayScene;
 
-	void Awake()
-	{
-		instance = this;
-	}
+	// void Awake()
+	// {
+	// 	instance = this;
+	// }
 
-	public override void OnStartHost()
-	{
-		// set the game mode
-		// LobbyScene.SetActive(true);
-		// PlayScene.SetActive(false);
-	}
+	// public override void OnStartHost()
+	// {
+	// 	// set the game mode
+	// 	// LobbyScene.SetActive(true);
+	// 	// PlayScene.SetActive(false);
+	// }
 
-	public override void OnStopHost()
-	{
-		// LobbyScene.SetActive(true);
-		// PlayScene.SetActive(false);
+	// public override void OnStopHost()
+	// {
+	// 	// LobbyScene.SetActive(true);
+	// 	// PlayScene.SetActive(false);
 
-	}
+	// }
 
-	public override void OnStartClient(NetworkClient client)
-	{
-		// set the game mode
+	// public override void OnStartClient(NetworkClient client)
+	// {
+	// 	// set the game mode
 
-		// LobbyScene.SetActive(false);
-		// PlayScene.SetActive(true);
+	// 	// LobbyScene.SetActive(false);
+	// 	// PlayScene.SetActive(true);
 
-	}
+	// }
 
-	public override void OnStopClient()
-	{
-		// LobbyScene.SetActive(true);
-		// PlayScene.SetActive(false);
+	// public override void OnStopClient()
+	// {
+	// 	// LobbyScene.SetActive(true);
+	// 	// PlayScene.SetActive(false);
 
-	}
+	// }
 
 
 

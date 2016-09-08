@@ -4,7 +4,8 @@ using UnityEngine.UI;
 
 public class V_Settings : V_UIElement 
 {
-	public enum ExpressGraphicsTypes {HIGH = 6, MED = 3, LOW = 0};
+	public V_CameraBrightness cameraGamma;
+	public enum ExpressGraphicsTypes {HIGH = 6, MED = 3, LOW = 1};
 	V_AudioController audioController;
 	ExpressGraphicsTypes expressType;
 	bool isAdvancedGraphicsEnabled = false;
@@ -36,8 +37,7 @@ public class V_Settings : V_UIElement
 	public Slider mouseSensitivitySlider, zoomSensitivitySlider;
 	public Toggle invertToggle, invertMouseButtonsToggle;
 		// keyboard
-	public InputField rightInput;
-	public InputField leftInput, crouchInput, zoomInput, jumpInput, pickupInput;
+	public Button rightArrow, crouchBtn, zoomBtn, jumpBtn, pickupBtn;
 		
 	[HeaderAttribute("audio Settings")]
 	// audio settings
@@ -49,7 +49,7 @@ public class V_Settings : V_UIElement
 	public Image currentCrosshair;
 		// cached ref to RectTransform of crosshairs
 		private RectTransform crosshairRectTransform;
-		// a vector to keep the original size of the crosshair so it wont get distocrosshairRectTransformed when we change its size at runtime
+		// a vector to keep the original size of the crosshair so it wont get distorted when we change its size at runtime
 		private Vector2 crosshairOriginalSize;
 	private float crosshairSizeFactor = 1f;
 	public Image[] crosshairs;
@@ -67,32 +67,40 @@ public class V_Settings : V_UIElement
 		// checking if dependencies are null to throw err
 		if (audioController == null)
 		{
-			UIController.ThrowError("V_Settings: Awake: ome of the dependencies is null", UIController.CloseError);
+			UIController.ThrowError("V_Settings: Awake: some of the dependencies is null", UIController.CloseError);
+			throw new System.Exception("V_Settings: Awake: some of the dependencies is null");
 		}
-		// Settings main buttons
-		UIController.IfClick_GoTo(videoBtn, ()=> UIController.Enable_DisableUI(videoPanel, controlsPanel, audioPanel, picPanel));
-		UIController.IfClick_GoTo(controlsBtn, ()=> UIController.Enable_DisableUI(controlsPanel, videoPanel, audioPanel, picPanel));
-		UIController.IfClick_GoTo(audioBtn, ()=> UIController.Enable_DisableUI(audioPanel, videoPanel, controlsPanel, picPanel));
-		UIController.IfClick_GoTo(picBtn, ()=> UIController.Enable_DisableUI(picPanel, videoPanel, controlsPanel, audioPanel));
+		try
+		{
+			// Settings main buttons
+			UIController.IfClick_GoTo(videoBtn, ()=> UIController.Enable_DisableUI(videoPanel, controlsPanel, audioPanel, picPanel));
+			UIController.IfClick_GoTo(controlsBtn, ()=> UIController.Enable_DisableUI(controlsPanel, videoPanel, audioPanel, picPanel));
+			UIController.IfClick_GoTo(audioBtn, ()=> UIController.Enable_DisableUI(audioPanel, videoPanel, controlsPanel, picPanel));
+			UIController.IfClick_GoTo(picBtn, ()=> UIController.Enable_DisableUI(picPanel, videoPanel, controlsPanel, audioPanel));
 
-		UIController.IfClick_GoTo(applyBtn, SaveSettings);
-		UIController.IfClick_GoTo(cancelBtn, CancelSettings);
-		UIController.IfClick_GoTo(defaultBtn, RestoreSettings);
-		
-		// video settings buttons
-		UIController.IfClick_GoTo(expressGraphicBtn, ()=> {isAdvancedGraphicsEnabled = false; UIController.Enable_DisableUI(expressGraphicPanel, advancedGraphicPanel);});
-		UIController.IfClick_GoTo(advancedGraphicBtn, ()=> {isAdvancedGraphicsEnabled = true; UIController.Enable_DisableUI(advancedGraphicPanel, expressGraphicPanel);});
+			UIController.IfClick_GoTo(applyBtn, SaveSettings);
+			UIController.IfClick_GoTo(cancelBtn, CancelSettings);
+			UIController.IfClick_GoTo(defaultBtn, RestoreSettings);
+			
+			// video settings buttons
+			UIController.IfClick_GoTo(expressGraphicBtn, ()=> {isAdvancedGraphicsEnabled = false; UIController.Enable_DisableUI(expressGraphicPanel, advancedGraphicPanel);});
+			UIController.IfClick_GoTo(advancedGraphicBtn, ()=> {isAdvancedGraphicsEnabled = true; UIController.Enable_DisableUI(advancedGraphicPanel, expressGraphicPanel);});
 
-		UIController.IfClick_GoTo(expressHighBtn, ()=> expressType = ExpressGraphicsTypes.HIGH); // for fantastic QualitySettings
-		UIController.IfClick_GoTo(expressMedBtn, ()=> expressType = ExpressGraphicsTypes.MED); // for medium and good 
-		UIController.IfClick_GoTo(expressLowBtn, ()=> expressType = ExpressGraphicsTypes.LOW);  // for low QualitySettings
+			UIController.IfClick_GoTo(expressHighBtn, ()=> expressType = ExpressGraphicsTypes.HIGH); // for fantastic QualitySettings
+			UIController.IfClick_GoTo(expressMedBtn, ()=> expressType = ExpressGraphicsTypes.MED); // for medium and good 
+			UIController.IfClick_GoTo(expressLowBtn, ()=> expressType = ExpressGraphicsTypes.LOW);  // for low QualitySettings
 
-		// controlsBtns
-		UIController.IfClick_GoTo(mouseBtn, ()=> UIController.Enable_DisableUI(mousePanel, keyboardPanel));
-		UIController.IfClick_GoTo(keyboardBtn, ()=> UIController.Enable_DisableUI(keyboardPanel, mousePanel));
+			// controlsBtns
+			UIController.IfClick_GoTo(mouseBtn, ()=> UIController.Enable_DisableUI(mousePanel, keyboardPanel));
+			UIController.IfClick_GoTo(keyboardBtn, ()=> UIController.Enable_DisableUI(keyboardPanel, mousePanel));
 
-		// other settings
-		UIController.OnSliderChangesValue(crosshairSizeSlider, (value)=> ChangeCrosshairSize(value));
+			// other settings
+			UIController.OnSliderChangesValue(crosshairSizeSlider, (value)=> ChangeCrosshairSize(value));
+		}
+		catch (System.Exception err)
+		{
+			throw err;
+		}
 	}
 
 	void SetQuality(int level)
@@ -123,6 +131,10 @@ public class V_Settings : V_UIElement
     {
 
     }
+	void Update()
+	{
+		print(PlayerPrefs.GetFloat("gamma"));
+	}
 	public void LoadSettings()
 	{
 		// video
@@ -161,15 +173,15 @@ public class V_Settings : V_UIElement
 			// mouse settings
 			StartCoroutine(UIController.FillSlider(mouseSensitivitySlider, PlayerPrefs.GetFloat("mouseSensitivity", 0)));
 			StartCoroutine(UIController.FillSlider(zoomSensitivitySlider, PlayerPrefs.GetFloat("zoomSensitivity", 0)));
-			invertToggle.isOn = PlayerPrefs.GetInt("invecrosshairRectTransform") == 1 ? true : false;
-			invertMouseButtonsToggle.isOn = PlayerPrefs.GetInt("invecrosshairRectTransformMouseButtons") == 1 ? true : false;
+			invertToggle.isOn = PlayerPrefs.GetInt("invert") == 1 ? true : false;
+			invertMouseButtonsToggle.isOn = PlayerPrefs.GetInt("invertMouseButtons") == 1 ? true : false;
+			
 			// keyboard settings
-
-			rightInput.text = PlayerPrefs.GetString("right");
-			crouchInput.text = PlayerPrefs.GetString("crouch");
-			zoomInput.text = PlayerPrefs.GetString("zoom");
-			jumpInput.text = PlayerPrefs.GetString("jump");
-			pickupInput.text = PlayerPrefs.GetString("pickup");
+			rightArrow.GetComponentInChildren<Text>().text = PlayerPrefs.GetString("right");
+			crouchBtn.GetComponentInChildren<Text>().text = PlayerPrefs.GetString("crouch");
+			zoomBtn.GetComponentInChildren<Text>().text = PlayerPrefs.GetString("zoom");
+			jumpBtn.GetComponentInChildren<Text>().text = PlayerPrefs.GetString("jump");
+			pickupBtn.GetComponentInChildren<Text>().text = PlayerPrefs.GetString("pickup");
 		}
 		catch (System.Exception)
 		{
@@ -215,7 +227,7 @@ public class V_Settings : V_UIElement
 		// videoSettings
 		PlayerPrefs.SetInt("advancedGraphic", isAdvancedGraphicsEnabled ? 1 : 0);
 		PlayerPrefs.SetInt("beginnerGraphics",(int) expressType);
-
+		
 		PlayerPrefs.SetInt("resolution", resolutionDropDown.value);
 		PlayerPrefs.SetInt("vsync", vSyncDropDown.value);
 		PlayerPrefs.SetInt("fulscreen", fulScreenToggle.isOn ? 1 : 0);
@@ -229,14 +241,14 @@ public class V_Settings : V_UIElement
 			// mouse
 			PlayerPrefs.SetFloat("mouseSensitivity", mouseSensitivitySlider.value);
 			PlayerPrefs.SetFloat("zoomSensitivity", zoomSensitivitySlider.value);
-			PlayerPrefs.SetInt("invecrosshairRectTransform", invertToggle.isOn ? 1 : 0);
-			PlayerPrefs.SetInt("invecrosshairRectTransformMouseButtons", invertMouseButtonsToggle.isOn ? 1 : 0);
+			PlayerPrefs.SetInt("invert", invertToggle.isOn ? 1 : 0);
+			PlayerPrefs.SetInt("invertMouseButtons", invertMouseButtonsToggle.isOn ? 1 : 0);
 			// keyboard
-			PlayerPrefs.SetString("right", rightInput.text);
-			PlayerPrefs.SetString("crouch", crouchInput.text);
-			PlayerPrefs.SetString("zoom", zoomInput.text);
-			PlayerPrefs.SetString("jump", jumpInput.text);
-			PlayerPrefs.SetString("pickup", pickupInput.text);		
+			PlayerPrefs.SetString("right", rightArrow.GetComponentInChildren<Text>().text);
+			PlayerPrefs.SetString("crouch", crouchBtn.GetComponentInChildren<Text>().text);
+			PlayerPrefs.SetString("zoom", zoomBtn.GetComponentInChildren<Text>().text);
+			PlayerPrefs.SetString("jump", jumpBtn.GetComponentInChildren<Text>().text);
+			PlayerPrefs.SetString("pickup", pickupBtn.GetComponentInChildren<Text>().text);		
 		
 		// audioSettings
 		PlayerPrefs.SetFloat("themeVol", themeVolSlider.value);
@@ -256,12 +268,21 @@ public class V_Settings : V_UIElement
 
 	void ApplySettings()
 	{
-
 		// graphic settings
 		QualitySettings.vSyncCount = vSyncDropDown.value;
 		PlayerSettings.defaultIsFullScreen = fulScreenToggle.isOn;
 		int[] res = ReturnResolution(resolutionDropDown.value);
-		RenderSettings.ambientLight = Color.Lerp(Color.black, Color.white, GammaSlider.value);
+		print(res[0]);
+		print(res[1]);
+		Screen.SetResolution(res[0], res[1], fulScreenToggle.isOn);
+		// print(Screen.currentResolution);
+		// #revision: add image effects
+		// RenderSettings.ambientLight = Color.Lerp(Color.black, Color.white, GammaSlider.value);
+		if (cameraGamma == null)
+		{
+			throw new System.Exception("Please Set up Gamma script on Camera: V_CameraBrightness");
+		}
+		cameraGamma.brightness = GammaSlider.value;
 		if (isAdvancedGraphicsEnabled)
 		{
 			QualitySettings.antiAliasing = antiAliasingDropDown.value;
@@ -284,6 +305,7 @@ public class V_Settings : V_UIElement
 
 	public int[] ReturnResolution(int i)
 	{
+		// #revision
 		switch (i)
 		{
 			case 0:

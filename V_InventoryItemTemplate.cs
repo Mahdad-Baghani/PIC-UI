@@ -6,5 +6,4 @@ public class V_InventoryItemTemplate : MonoBehaviour
 	public ItemTypes itemType;
 	public string itemName;
 	public float itemTime;
-
 }

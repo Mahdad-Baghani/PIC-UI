@@ -4,6 +4,7 @@ using System.Collections;
 // using System.Collections.Generic;
 public class V_Shop : V_UIElement 
 {
+
 	// fields
 	[SpaceAttribute(5f)]
 	[HeaderAttribute("Shop Items and categories")]
@@ -11,22 +12,37 @@ public class V_Shop : V_UIElement
 
 	// to use while comparing the items
 	[SerializeField] private V_ShopItem _selectedItem;
+	[SerializeField] private V_ShopItem _selectedItemByMouseHover;
 	[SerializeField] private V_ShopItem _compareeItem;
-	
+
 	public V_ShopItem selectedItem 
 	{ 
 		get{return _selectedItem;} 
 		set 
 		{
 			_selectedItem = value; 
+			if (_selectedItemByMouseHover == value) _selectedItemByMouseHover = null;
 			if (value != null) 
 			{
 				CompareItems(_selectedItem, _compareeItem);
+				ShowWeaponDescription(_selectedItem.description);
 			} 
 			else
 			{
 				StopComparing();
 			}
+		}
+	}
+
+  
+    public V_ShopItem selectedItemByMouseHover
+	{
+		get { return _selectedItemByMouseHover;}
+		set 
+		{
+			_selectedItemByMouseHover = value;
+			if(value != null)
+				CompareItems(_selectedItemByMouseHover);
 		}
 	}
     public V_ShopItem compareeItem 
@@ -89,8 +105,14 @@ public class V_Shop : V_UIElement
 	public GameObject specialWeaponsPanel;
 	public GameObject specialCharacterPanel;
 
-	[HeaderAttribute("References")]
+	[HeaderAttribute("References and prefabs")]
 	[SpaceAttribute(10f)]
+
+	public V_PlayerTemplate playerModel;
+	public GameObject weaponTo3DPlaceholder;
+	public GameObject weaponTo3D;
+	public Text WeaponDescriptionTxt;
+	public Slider rotateWeaponSlider;
 
 	// character's score and credit
 	public Text score;
@@ -169,8 +191,22 @@ public class V_Shop : V_UIElement
 		UIController.IfClick_GoTo(specialWeaponsBtn, ()=> UIController.Enable_DisableUI(specialWeaponsPanel, specialCharacterPanel));
 		UIController.IfClick_GoTo(specialCharactersBtn, ()=> UIController.Enable_DisableUI(specialCharacterPanel, specialWeaponsPanel));
 
-
+		UIController.OnSliderChangesValue(rotateWeaponSlider, (value)=>RotateWeapon((int)value));
 	}
+	private void RotateWeapon(int amount)
+	{
+		Vector3 pos = weaponTo3DPlaceholder.transform.position;
+	
+		if(weaponTo3D != null && weaponTo3DPlaceholder != weaponTo3D)
+		{
+			Destroy(weaponTo3DPlaceholder);
+			weaponTo3DPlaceholder = Instantiate(weaponTo3D) as GameObject;
+		}
+		weaponTo3DPlaceholder.transform.position = pos;
+		// weaponTo3DPlaceholder.transform.Rotate(new Vector3(0, 0, 0));
+		weaponTo3DPlaceholder.transform.Rotate(new Vector3(0, amount, 0));
+	}
+	
 	new void OnEnable()
 	{
 		// hiding inherited OnEnable from V_UIElement
@@ -191,6 +227,14 @@ public class V_Shop : V_UIElement
 		// debug
 		// print ("V_Shop: OnEnable(): hiding inherited OnEnable()");
 	}
+	private void ShowWeaponDescription(string description)
+    {
+		if(WeaponDescriptionTxt = null)
+		{
+			throw new System.Exception("V_Shop: ShowWeaponDescription(): WeaponDescriptionTxt is not set from inspector");
+		}
+    }
+
 
 	void Update()
 	{
@@ -204,6 +248,10 @@ public class V_Shop : V_UIElement
 	{
 
 	}
+	void BuyCredit(int amount)
+	{
+		// we can set the purchase to be sufficient to buy the selectedItem
+	}
 
 	public void BuyItem(V_ShopItem item)
 	{
@@ -213,9 +261,14 @@ public class V_Shop : V_UIElement
 			return;
 		}
 		// #revision: checking player Charge and credit
-		if (item.requiredCharge > 0)
+		if (playerModel.badge.badgeType < item.requiredBadge)
 		{
-			UIController.AskYesNoQ("Your dont have enough credit, wanna charge?",
+			UIController.ThrowError("your badge is not equivalent to what is needed to buy this weapon", UIController.CloseError);
+			return;
+		}
+		if (playerModel.charge < item.requiredCharge)
+		{
+			UIController.AskYesNoQuestion("You dont have enough credit, wanna charge?",
 			()=> // if pressed yes
 			{
 				BuyCredit();
@@ -228,19 +281,27 @@ public class V_Shop : V_UIElement
 				return;
 			});
 		}
-		// #revision: check players score and level and unlock the item
-		
+		if (playerModel.score < item.requiredScore)
+		{
+			UIController.ThrowError("U dont have enough game score to buy this item", UIController.CloseError);
+			return;
+		}
 
+		// now we ask if player really wants to buy the item
+		// we open a modal to select the time of item
+		UIController.AskYesNoQuestion("do u want to buy " + item.itemPrfb.name,
+		// if pressed yes
+		()=> {},
+		// if pressed no
+		()=> {UIController.CloseYesNoQ(); return;});
 	}
-
 	public void DonateItem(V_ShopItem item)
 	{
 		if (item == null)
 		{
-			UIController.ThrowError("V_Shop: DonateItem(): selectedItem is null", () => UIController.GoFrom_To(UIController.genericErrorModal, this.gameObject));
+			UIController.ThrowError("V_Shop: DonateItem(): selectedItem is null", UIController.CloseError);
 			return;
 		}
-
 		// #revision
 		UIController.SelectFromListModal("Do you want to Donate ?",
 		// if click select

@@ -5,14 +5,31 @@ using System.Collections.Generic;
 [RequireComponent(typeof(V_InventoryItems))]
 public class V_Inventory_UI : V_UIElement
 {
-	public const int MAX_NUM_FOR_WEAPON_SLUTS = 6;
+	public const int MAX_WEAPON_SLOT_NUM = 6;
+	public const int MAX_WEAPON_UPGRADE_NUM = 8;
 	// fields
 	[SerializeField] List<V_InventoryItem> inGamePistols;
 	[SerializeField] List<V_InventoryItem> inGameRifles;
 	[SerializeField] List<V_InventoryItem> inGameRifles_secondary;
 	
+	public GameObject[] inGamePistolSlots, inGameRifleSlots, inGameSecRifleSlots = new GameObject[MAX_WEAPON_SLOT_NUM];
+
+	public GameObject[] weaponUpgrades = new GameObject[MAX_WEAPON_UPGRADE_NUM];
 
 	public V_InventoryItems inventoryItems;
+	[SerializeField] private V_InventoryItem _selectedItemByMouseHover;
+	public V_InventoryItem selectedItemByMouseHover
+	{
+		get { return _selectedItemByMouseHover;}
+		set 
+		{
+			_selectedItemByMouseHover = value;
+			if(value != null) 
+				CompareItems(_selectedItemByMouseHover);
+			else 
+				StopComparing();
+		}
+	}
 
 	[SerializeField] private V_InventoryItem _selectedItem;
 	public V_InventoryItem selectedItem
@@ -23,13 +40,12 @@ public class V_Inventory_UI : V_UIElement
 			 _selectedItem = value;
 			 if (value != null)
 			 {
+				 if (_selectedItemByMouseHover == value) _selectedItemByMouseHover = null;
 				 CompareItems(_selectedItem, _compareeItem);
-				 ShowUpgrades(_selectedItem);
 			 }
 			 else
 			 {
 				 StopComparing();
-				 HideUpgrades();
 			 }
 		}
 	}
@@ -47,27 +63,52 @@ public class V_Inventory_UI : V_UIElement
 		}
 	}
 
-    private void HideUpgrades()
-    {
-        // throw new NotImplementedException();
-    }
+	// last equipped Weapon: used when we want to add the upgrades:
 
-    private void ShowUpgrades(V_InventoryItem item)
-    {
-        if (item.itemClass != ItemClass.WEAPON)
+	V_Weapon lastEquippedWeapon;
+	[SerializeField] private V_InventoryItem _equippedPistol;
+	public V_InventoryItem equippedPistol
+	{
+		get { return _equippedPistol;}
+		set 
 		{
-			return;
+			_equippedPistol = value;
+			if(value != null)
+			{
+				ShowUpgrades(_equippedPistol);
+				lastEquippedWeapon = _equippedPistol.itemPrfb.GetComponent<V_Weapon>();
+			}
 		}
-		// weaponUpgradePanel.SetActive(true);
-		// foreach (V_UpgardeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
-		// {
-		// 	GameObject tmpObj = UIController.emptyObjectWithImage;
-		// 	// tmpObj.AddComponent<Image>();
-		// 	tmpObj.GetComponent<Image>().sprite = upgrade.icon;
-		// 	tmpObj.transform.SetParent(weaponUpgradePanel.transform ,false);		
-		// }
-		// throw new NotImplementedException();
-    }
+	}
+	[SerializeField] private V_InventoryItem _equippedRifle;
+	public V_InventoryItem equippedRifle
+	{
+		get { return _equippedRifle;}
+		set 
+		{
+			_equippedRifle = value;
+			if(value != null)
+			{
+				ShowUpgrades(_equippedRifle);
+				lastEquippedWeapon = _equippedRifle.GetComponent<V_Weapon>();
+			}
+		}
+	}
+	[SerializeField] private V_InventoryItem _equippedSecRifle;
+	public V_InventoryItem equippedSecRifle
+	{
+		get { return _equippedSecRifle;}
+		set 
+		{
+			_equippedSecRifle = value;
+			if(value != null)
+			{
+				ShowUpgrades(_equippedSecRifle);
+				lastEquippedWeapon = _equippedSecRifle.GetComponent<V_Weapon>();
+			}
+		}
+	}
+
 
 
 	[HeaderAttribute("Inventory main Buttons")]
@@ -90,7 +131,9 @@ public class V_Inventory_UI : V_UIElement
 	[HeaderAttribute("Inventory Panels")]
 	[SpaceAttribute(10f)]
 	public GameObject  weaponPanel;
-	public GameObject gearPanel, charactersPanel, weaponUpgradePanel;
+	public GameObject gearPanel, charactersPanel, weaponUpgradePanel, weaponCustomizePanel, weapon_to_customize_placeholder, weaponToCustomize;
+	
+	public Slider rotateWeaponSlider;
 
 	[HeaderAttribute("Inventory sub Panels")]
 	[SpaceAttribute(10f)]
@@ -105,7 +148,7 @@ public class V_Inventory_UI : V_UIElement
 	public GameObject lowerBodyPanel;
 	public GameObject headPanel;
 
-	[HeaderAttribute("References")]
+	[HeaderAttribute("References and prefabs")]
 	[SpaceAttribute(10f)]
 
 	public GameObject weaponComp;
@@ -116,20 +159,16 @@ public class V_Inventory_UI : V_UIElement
 	V_CharacterComparison characterComparer;
 	private V_Weapon tmpWeapon1, tmpWeapon2;
 	private V_Gear tmpGear1, tmpGear2;
+	public GameObject tmpWeaponUpgrade;
+
 	// private V_Character tmpCharacter1, tmpCharacter2;
-
-
 
 	// methods
 	public new void Awake()
 	{
 		base.Awake();
 		// inventoryItems = GetComponent<V_InventoryItems>();
-
-		inGamePistols = new List<V_InventoryItem>();
-		inGameRifles  = new List<V_InventoryItem>();
-		inGameRifles_secondary = new List<V_InventoryItem>();
-
+		InitializeInGameSlots();
 		try
 		{
 			weaponComparer = weaponComp.GetComponent<V_WeaponComparison>();
@@ -140,6 +179,7 @@ public class V_Inventory_UI : V_UIElement
 		{
 			UIController.ThrowError("V_Inventory_UI: Awake(): " + err.Message, ()=>{UIController.CloseError(); return;});			
 		}
+
 
 		// main buttons
 		UIController.IfClick_GoTo(WeaponsBtn, () => 
@@ -171,13 +211,106 @@ public class V_Inventory_UI : V_UIElement
 		UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
 
 		// equipped Items
-		UIController.IfClick_GoTo(inGamePistolsBtn, ()=> UIController.Enable_DisableUI(inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel,inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameSecRifleBtn, ()=> UIController.Enable_DisableUI(inGameRiflePanel, inGamePistolPanel, inGameSecRiflePanel, inGameGerenadePanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameSecRifleBtn, ()=> UIController.Enable_DisableUI(inGameSecRiflePanel, inGamePistolPanel, inGameRiflePanel, inGameGerenadePanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameGerenadeBtn, ()=> UIController.Enable_DisableUI(inGameGerenadePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameMeleePanel));
-		UIController.IfClick_GoTo(inGameMeleeBtn, ()=> UIController.Enable_DisableUI(inGameMeleePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel));
-	}
+		UIController.IfClick_GoTo(inGamePistolsBtn, OpenInGamePistol);
+		UIController.IfClick_GoTo(inGameRifleBtn, OpenInGameRifle );
+		UIController.IfClick_GoTo(inGameSecRifleBtn, OpenInGameSecRifle);
+		UIController.IfClick_GoTo(inGameGerenadeBtn, OpenInGameGerenade);
+		UIController.IfClick_GoTo(inGameMeleeBtn, OpenInGameMelee);
 
+		// customizeWeapon
+		UIController.OnSliderChangesValue(rotateWeaponSlider, (value)=> RotateWeapon((int)value));
+	}
+	private void RotateWeapon(int amount)
+	{
+		Vector3 pos = weapon_to_customize_placeholder.transform.position;
+
+		if(weaponToCustomize != null && weapon_to_customize_placeholder != weaponToCustomize)
+		{
+			Destroy(weapon_to_customize_placeholder);
+			weapon_to_customize_placeholder = Instantiate(weaponToCustomize) as GameObject;
+		}
+		weapon_to_customize_placeholder.transform.position = pos;
+		// weapon_to_customize_placeholder.transform.Rotate(new Vector3(0, 0, 0));
+		weapon_to_customize_placeholder.transform.Rotate(new Vector3(0, amount, 0));
+	}
+	private void OpenInGamePistol()
+	{
+		UIController.Enable_DisableUI(inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel,inGameMeleePanel);
+	}
+	private void  OpenInGameRifle()
+	{
+		UIController.Enable_DisableUI(inGameRiflePanel, inGamePistolPanel, inGameSecRiflePanel, inGameGerenadePanel, inGameMeleePanel);
+	}
+	private void OpenInGameSecRifle()
+	{
+		UIController.Enable_DisableUI(inGameSecRiflePanel, inGamePistolPanel, inGameRiflePanel, inGameGerenadePanel, inGameMeleePanel);
+	}
+	private void OpenInGameGerenade()
+	{
+		UIController.Enable_DisableUI(inGameGerenadePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameMeleePanel);
+	}
+	private void OpenInGameMelee()
+	{	
+		UIController.Enable_DisableUI(inGameMeleePanel, inGamePistolPanel, inGameRiflePanel, inGameSecRiflePanel, inGameGerenadePanel);
+	}
+	public void InitializeInGameSlots()
+	{
+		inGamePistols = new List<V_InventoryItem>();
+		inGameRifles  = new List<V_InventoryItem>();
+		inGameRifles_secondary = new List<V_InventoryItem>();
+		for (int i = 0; i < MAX_WEAPON_SLOT_NUM; i++)
+		{
+			inGamePistols.Add(null);
+			inGameRifles.Add(null);
+			inGameRifles_secondary.Add(null);
+		}
+	}
+	    private void HidePreviousUpgrades()
+    {
+		GameObject[] nestedUpgrades = new GameObject[8]; 
+		Transform gridTransform = weaponUpgradePanel.GetComponentInChildren<GridLayoutGroup>().transform;
+		for (int i = 0; i < gridTransform.childCount; i++)
+		{
+			nestedUpgrades[i] = gridTransform.GetChild(i).gameObject;
+		}
+
+		if(nestedUpgrades == null)
+		{
+			throw new System.Exception("V_Inventory_UI: HideUpgrades: No upgrade is set for this Weapon!!!!!");
+		}
+
+		int tmpI = 0;
+		foreach (GameObject item in nestedUpgrades)
+		{
+			if (item != null)
+			Destroy(item);
+			weaponUpgrades[tmpI] = null;
+			tmpI++;
+		}
+    }
+    public void ShowUpgrades(V_InventoryItem item)
+    {
+		HidePreviousUpgrades();
+        if (item.itemClass != ItemClass.WEAPON)
+		{
+			return;
+		}
+		if(tmpWeaponUpgrade == null)
+		{
+			throw new System.Exception("V_Inventory_UI: ShowUpgrades(): tmpWeaponUpgrade is null");
+		}
+		weaponUpgradePanel.SetActive(true);
+		int tmpI = 0;
+		foreach (V_UpgradeObject upgrade in item.itemPrfb.GetComponent<V_Weapon>().upgrades)
+		{
+			GameObject tmpObj = Instantiate(tmpWeaponUpgrade) as GameObject;
+			tmpObj.GetComponent<Image>().sprite = upgrade.icon;
+			tmpObj.GetComponent<V_WeaponUpgradeItem>().upgrade = upgrade;
+			tmpObj.transform.SetParent(weaponUpgradePanel.GetComponentInChildren<GridLayoutGroup>().transform ,false);		
+			weaponUpgrades[tmpI] = tmpObj;
+			tmpI++;
+		}
+    }
 	public void AddToInGameInventory(ref V_InventoryItem item)
 	{
 		switch (item.itemType)
@@ -188,18 +321,26 @@ public class V_Inventory_UI : V_UIElement
 
 			case ItemTypes.W_ASSAULT:
 				Debug.LogAssertion("item is a rifle " + item.name);
-				if(inGameRiflePanel.activeSelf)
+				if(!inGameRiflePanel.activeInHierarchy && inGameSecRiflePanel.activeInHierarchy)
 				{
 					AddRifleToInGameRifles(item);
+					break;
 				}
-				else if (inGameSecRiflePanel.activeSelf)
+				if(inGameRiflePanel.activeInHierarchy)
 				{
+					Debug.LogAssertion("adding rifle " + item.name + "to primary rifles");
+					AddRifleToInGameRifles(item);
+				}
+				else if (inGameSecRiflePanel.activeInHierarchy)
+				{
+					Debug.LogAssertion("adding rifle " + item.name + "to secondary rifles");
 					AddSecRifleToInGameRifles(item);
 				}	
 				else
 				{
 					UIController.ThrowError("V_Inventory_UI: AddToInGameInventory: Cannot add rifle to either primary or secondary group!" 
-											+ "somethin wrong with item settign", UIController.CloseError);
+											+ "somethin wrong with item setting", UIController.CloseError);
+					throw new System.Exception("V_Inventory_UI: AddToInGameInventory(): somethin wrong with item setting");
 				}
 				break;
 
@@ -210,74 +351,76 @@ public class V_Inventory_UI : V_UIElement
 	private void AddPistolToInGamePistols(V_InventoryItem item)
 	{
 		bool successfulOperation = false;
-		while(inGamePistols.Count < MAX_NUM_FOR_WEAPON_SLUTS)
-		{
-			inGamePistols.Add(null);
-		}
 		// checking for empty space in inGamePistols
-		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		for(int i = 0; i < MAX_WEAPON_SLOT_NUM - 1; i++)
 		{
-			if (inGamePistols[i] = null)
+			if (inGamePistols[i] == null)
 			{
+				// inGamePistolSlots[i] = item.gameObject;
 				item.isAnInGameItem = true;
-				inGamePistols.Add(item);
+				inGamePistols[i] = item;
 				successfulOperation = true;
+				// #revision
+				// item.gameObject.transform.SetParent(inGamePistolSlots[i].transform, false);
+				item.gameObject.transform.SetParent(inGamePistolPanel.GetComponent<GridLayoutGroup>().transform, false);
 				break;
 			}
 		}
 		if (!successfulOperation)
 		{
-			//#revision: notify the player that you cannot add this item to inGames; 
+			//#revision: notify the player that you cannot add this item to inGames;
+			Debug.LogError("inGamesPistols does not have an empty slot"); 
 		}
 	}
 
 	private void AddRifleToInGameRifles(V_InventoryItem item)
 	{
 		bool successfulOperation = false;
-		while(inGameRifles.Count < MAX_NUM_FOR_WEAPON_SLUTS)
-		{
-			inGameRifles.Add(null);
-		}
 		// checking for empty space in inGameRifles
-		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		for(int i = 0; i < MAX_WEAPON_SLOT_NUM - 1; i++)
 		{
-			if (inGameRifles[i] = null)
+			if (inGameRifles[i] == null)
 			{
 				item.isAnInGameItem = true;
-				inGameRifles.Add(item);
+				inGameRifles[i] = item;
 				successfulOperation = true;
+				// #revision
+				// item.gameObject.transform.SetParent(inGameRifleSlots[i].transform, false);
+				item.gameObject.transform.SetParent(inGameRiflePanel.GetComponent<GridLayoutGroup>().transform, false);
 				break;
 			}
 		}
 		if (!successfulOperation)
 		{
-			//#revision: notify the player that you cannot add this item to inGames; 
+			//#revision: notify the player that you cannot add this item to inGames;			 
+ 			Debug.LogError("inGameRifles does not have an empty slot"); 
 		}
 	}
 	private void AddSecRifleToInGameRifles(V_InventoryItem item)
 	{
 		bool successfulOperation = false;
-		while(inGameRifles_secondary.Count < MAX_NUM_FOR_WEAPON_SLUTS)
-		{
-			inGameRifles_secondary.Add(null);
-		}
 		// checking for empty space in inGameRifles_secondary
-		for(int i = 0; i < MAX_NUM_FOR_WEAPON_SLUTS - 1; i++)
+		for(int i = 0; i < MAX_WEAPON_SLOT_NUM - 1; i++)
 		{
-			if (inGameRifles_secondary[i] = null)
+			if (inGameRifles_secondary[i] == null)
 			{
 				item.isAnInGameItem = true;
-				inGameRifles_secondary.Add(item);
+				inGameRifles_secondary[i] = item;
 				successfulOperation = true;
+				// #revision
+				// item.gameObject.transform.SetParent(inSecGameRifleSlots[i].transform, false);
+				item.gameObject.transform.SetParent(inGameSecRiflePanel.GetComponent<GridLayoutGroup>().transform, false);
 				break;
 			}
 		}
 		if (!successfulOperation)
 		{
-			//#revision: notify the player that you cannot add this item to inGames; 
+			//#revision: notify the player that you cannot add this item to inGames;
+			Debug.LogError("inGameSecRifles does not have an empty slot"); 
 		}
 
 	}
+
 	public void EquipItem(ref V_InventoryItem item)
 	{
 		switch (item.itemType)
@@ -312,16 +455,25 @@ public class V_Inventory_UI : V_UIElement
 		{
 			case ItemTypes.W_PISTOL:
 				EquipPistol(item, false);
+				item.transform.SetParent(pistolPanel.GetComponentInChildren<GridLayoutGroup>().transform, false);
+				item.transform.SetSiblingIndex(item.indexOfItemInList);
+				HidePreviousUpgrades();
 				break;
 
 			case ItemTypes.W_ASSAULT:
 				if(inGameRiflePanel.activeInHierarchy)
 				{
 					EquipAssault(item, false);
+					item.transform.SetParent(assaultPanel.GetComponentInChildren<GridLayoutGroup>().transform, false);
+					item.transform.SetSiblingIndex(item.indexOfItemInList);
+					HidePreviousUpgrades();
 				}
 				else if (inGameSecRiflePanel.activeInHierarchy)
 				{
 					EquipAssault_secondary(item, false);
+					item.transform.SetParent(assaultPanel.GetComponentInChildren<GridLayoutGroup>().transform, false);
+					item.transform.SetSiblingIndex(item.indexOfItemInList);
+					HidePreviousUpgrades();
 				}
 				else
 				{
@@ -337,14 +489,58 @@ public class V_Inventory_UI : V_UIElement
 	private void EquipPistol(V_InventoryItem pistol, bool equipped)
 	{
 		pistol.isEquipped = equipped;
+		if (equipped)
+		{
+			equippedPistol = pistol;
+		}
+		else
+		{
+			pistol.isAnInGameItem = false;
+			equippedPistol = null;
+			// Debug.LogAssertion("inGamePistols is " + inGamePistols);
+			int? tmpIndex = UIController.ReturnIndexInList(inGamePistols, pistol);
+			// Debug.LogAssertion("tmpIndex is " + tmpIndex);
+			if(tmpIndex != null)
+			{
+				inGamePistols[(int)tmpIndex] = null;
+			}
+		}
 	}
 	private void EquipAssault(V_InventoryItem assault, bool equipped)
 	{
 		assault.isEquipped = equipped;
+		if(equipped)
+		{
+			equippedRifle = assault;
+		}
+		else
+		{
+			assault.isAnInGameItem = false;
+			equippedRifle = null;
+			int? tmpIndex = UIController.ReturnIndexInList(inGameRifles, assault);
+			if(tmpIndex != null)
+			{
+				inGameRifles[(int)tmpIndex] = null;
+			}
+		}
 	}
 	private void EquipAssault_secondary(V_InventoryItem assault_sec, bool equipped)
 	{
 		assault_sec.isEquipped = equipped;
+		if(equipped)
+		{
+			equippedSecRifle = assault_sec;
+		}
+		else
+		{
+			assault_sec.isAnInGameItem = false;
+			equippedSecRifle = null;
+			int? tmpIndex = UIController.ReturnIndexInList(inGameRifles_secondary, assault_sec);
+			if(tmpIndex != null)
+			{
+				inGameRifles_secondary[(int)tmpIndex] = null;
+			}
+		}
 	}
 	public new void OnEnable()
 	{
@@ -361,6 +557,32 @@ public class V_Inventory_UI : V_UIElement
 
 		ListItems();
 	}
+	public void AddOrRemoveUpgrade(V_UpgradeObject upItem, bool add)
+	{
+		// int? tmpIndex = UIController.ReturnIndexInList(lastEquippedWeapon.upgrades, upItem);
+		int tmpI = lastEquippedWeapon.upgrades.IndexOf(upItem);
+
+		// #revision: may need to change the lines on setting isUsed and model,SetActive to true
+		// if(tmpIndex != null)
+		// {
+		// 	upItem.isUsed = add;
+		// 	upItem.model.SetActive(add);
+		// 	print(upItem + " was added");
+		// }
+
+	}
+	// public void RemoveUpgrade(V_UpgradeObject upItem)
+	// {
+	// 	int? tmpIndex = UIController.ReturnIndexInList(lastEquippedWeapon.upgrades, upItem);
+		
+	// 	// #revision: may need to change the lines on setting isUsed and model,SetActive to true
+	// 	if(tmpIndex != null)
+	// 	{
+	// 		upItem.isUsed = false;
+	// 		upItem.model.SetActive(false);
+	// 		print(upItem + " was removed");
+	// 	}
+	// }
 	public void ListItems()
 	{
 

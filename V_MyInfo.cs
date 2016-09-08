@@ -49,7 +49,7 @@ public class V_MyInfo : V_UIElement
 		// #revision : do something about the player
 		try
 		{
-			playerModel = FindObjectOfType<V_PlayerTemplate>();
+			// playerModel = FindObjectOfType<V_PlayerTemplate>();
 			upgradeView = FindObjectOfType<V_WeaponUpgradeView>();
 			pool = FindObjectOfType <V_ObjectPool>();
 		}
@@ -76,16 +76,16 @@ public class V_MyInfo : V_UIElement
 			badgeImage.sprite = playerModel.badge.badgeIcon;
 			badgeName.text = playerModel.badge.badgeName;
 			nickName.text = playerModel.nickName;
-			if (playerModel.clan != null)
-			{
-				clanLogo.transform.parent.gameObject.SetActive(true);
-				clanLogo.sprite = playerModel.clan.logo;
-				clanName.text = playerModel.clan.clanName;
-			}
-			else
-			{
-				clanLogo.transform.parent.gameObject.SetActive(false);
-			}
+			// if (playerModel.clan != null)
+			// {
+			// 	clanLogo.transform.parent.gameObject.SetActive(true);
+			// 	clanLogo.sprite = playerModel.clan.logo;
+			// 	clanName.text = playerModel.clan.clanName;
+			// }
+			// else
+			// {
+			// 	clanLogo.transform.parent.gameObject.SetActive(false);
+			// }
 
 			scoreBadgeTxt.text = string.Format(playerModel.score + "/" + (++playerModel.badge.badgeType));
 

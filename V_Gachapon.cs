@@ -70,7 +70,7 @@ public class V_Gachapon : V_UIElement
 		// #revision: add other types of items
 		if (playerModel.charge < 20)
 		{
-			UIController.AskYesNoQ("Do you wanna charge?", 
+			UIController.AskYesNoQuestion("Do you wanna charge?", 
 			()=> {/* go buy something */},
 			UIController.CloseYesNoQ);
 		}

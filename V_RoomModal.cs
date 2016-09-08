@@ -83,7 +83,7 @@ public class V_RoomModal : V_UIElement
 	}
 	void OnCancel()
 	{
-		UIController.AskYesNoQ("Are u sure u want to discard the room?", 
+		UIController.AskYesNoQuestion("Are u sure u want to discard the room?", 
 		() => // yes answer
 		{
 			UIController.GoFrom_To(UIController.genericYesNoModal, UIController.LobbyPanel); 

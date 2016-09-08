@@ -14,8 +14,8 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
 
     // buttons and UI refs
-    public GameObject inGamePanel;
     public bool isAnInGameItem = false, isEquipped = false;
+    public int indexOfItemInList = 0;
     public Image icon;
     public Button donateBtn, deleteBtn, customizeBtn;
     public Text itemNameTxt, timeTxt;
@@ -33,12 +33,13 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
     {
         base.Awake();
         Inventory = FindObjectOfType<V_Inventory_UI>();
+        indexOfItemInList = transform.GetSiblingIndex();
 
         UIController.IfClick_GoTo(donateBtn, ()=> Inventory.DonateItem(this));
         // #revision: Save the deleted item so it doesnt show up anymore
         UIController.IfClick_GoTo(deleteBtn, () =>
         {
-            UIController.AskYesNoQ("Do you want to delete this item?",
+            UIController.AskYesNoQuestion("Do you want to delete this item?",
             () =>
             {
                 // #revision
@@ -53,12 +54,20 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
 
         if (customizeBtn != null)
         {
-            // UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
+            UIController.IfClick_GoTo(customizeBtn, ()=> CustomizeWeapon(this));
         }
     }
     new void OnEnable()
     {
         // do not call base.OnEnable on this type of objects, so we keep it seperate from UI panels which need to call base.OnEnable() while hiding it
+    }
+    void CustomizeWeapon(V_InventoryItem item)
+    {
+        print("CustomizeWeapon is enabled");
+        UIController.Enable_DisableUI(Inventory.weaponCustomizePanel);
+        Inventory.weaponToCustomize = item.itemPrfb.gameObject;
+        // print(Inventory.weapon_to_customize_placeholder.name);
+
     }
 
     public void Initialize(GameObject prfb)
@@ -68,12 +77,12 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         V_Weapon someWeapon = itemPrfb.GetComponent<V_Weapon>();
         if (someWeapon)
         {
-            if(itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.rifle)
+            if(someWeapon.type == V_Weapon.weaponType.rifle)
             {
                 itemClass = ItemClass.WEAPON;
                 itemType = ItemTypes.W_ASSAULT;
             }
-            if(itemPrfb.GetComponent<V_Weapon>().type == V_Weapon.weaponType.pistol)
+            if(someWeapon.type == V_Weapon.weaponType.pistol)
             {
                 itemClass = ItemClass.WEAPON;
                 itemType = ItemTypes.W_PISTOL;
@@ -107,8 +116,13 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             }
         }
     }
-    public virtual void OnPointerEnter(PointerEventData data)
+    public void OnPointerEnter(PointerEventData data)
     {
+        if(Inventory.selectedItemByMouseHover == null && Inventory.selectedItem == null)
+        {
+            Inventory.selectedItemByMouseHover = this;
+            return;
+        }
         if (Inventory.selectedItem == null)
         {
             return;
@@ -122,7 +136,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             Inventory.compareeItem = null;
         }
     }
-    public virtual void OnPointerDown(PointerEventData data)
+    public void OnPointerDown(PointerEventData data)
     {
         // detecting Double click
         mouseClickNumber++;
@@ -131,9 +145,9 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             return;
         }        
         mouseClickStarted = true;
-        // checking for double clicks, and calling 1. adding to ingames, 2. equippingItem, 3. deleting from ingames
+        // checking for double clicks, and calling some funcs to 1. adding to ingames, 2. equippingItem, 3. deleting from ingames
         StartCoroutine(OnDoubleClick());
-        
+
         if (data.button == PointerEventData.InputButton.Left)
         {
             EventSystem.current.SetSelectedGameObject(gameObject, data);
@@ -163,19 +177,21 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
             else if (!isAnInGameItem)
             {
                 Inventory.AddToInGameInventory(ref tmpItem);
-                Debug.LogAssertion("added item " + this.name + " to inventory");
+                Debug.LogAssertion("added item " + this.name + " to ingame inventory");
             }
-            // print("Equipped with " + this.itemPrfb.name);
         }
         mouseClickStarted = false;
         mouseClickNumber = 0;
     }
-    public virtual void OnPointerExit(PointerEventData data)
+    public void OnPointerExit(PointerEventData data)
     {
-        // Inventory.compareeItem = null;
+        if(Inventory.selectedItemByMouseHover == this)
+		{
+			Inventory.selectedItemByMouseHover = null;
+		}
     }
 
-    public virtual void OnSelect(BaseEventData data)
+    public void OnSelect(BaseEventData data)
     {
         try
         {
@@ -188,7 +204,7 @@ public class V_InventoryItem : V_UIElement, IPointerEnterHandler, IPointerDownHa
         }
     }
 
-    public virtual void OnDeselect(BaseEventData data)
+    public void OnDeselect(BaseEventData data)
     {
         Inventory.selectedItem = null;
         Inventory.compareeItem = null;

@@ -2,12 +2,12 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public enum ItemPurchaseMode 
-{
-	SCORE,
-	CHARGE, 
-	LEVEL
-}
+// public enum ItemPurchaseMode 
+// {
+// 	SCORE,
+// 	CHARGE, 
+// 	LEVEL
+// }
 public enum ItemTypes
 {
 	W_PISTOL,
@@ -32,11 +32,13 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	public bool isLocked;
 	public bool isPurchased;
 
-	public int requiredLevel;
+	public BadgeType requiredBadge;
 
 	public int requiredScore;
 
 	public int requiredCharge;
+
+	public string description;
 
 	public ItemTypes itemType;
 	public ItemClass itemClass;
@@ -49,16 +51,14 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	// item detais
 	// the detail panel is what hosts all the buttons, lock panel, etc.
 	public GameObject detailPanel;
+	public GameObject itemIsPurcahsed, itemLock;
+
 	[SpaceAttribute(5f)]
 	public Button donateBtn;
 	public Button buyBtn;
-	public Text itemNameTxt;
-	public Text timeTxt;
+	public Text itemNameTxt, timeTxt;
 	public Image level;
-	public GameObject itemLock;
-	public Text requiredLevelTxt;
-	public Text requiredScoreTxt;
-	public Text requiredChargeTxt;
+	public Text requiredBadgeTxt, requiredScoreTxt, requiredChargeTxt;
 
 	// mehtods
 	public new void Awake()
@@ -75,6 +75,18 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 				return;
 			});
 		}
+		// initializing the shop item
+		Initialize();
+
+		requiredBadgeTxt.text = requiredBadge.ToString();
+		requiredScoreTxt.text = requiredScore.ToString();
+		requiredChargeTxt.text= requiredCharge.ToString();
+		
+		UIController.IfClick_GoTo(donateBtn, ()=> Shop.DonateItem(this));
+		UIController.IfClick_GoTo(buyBtn, ()=> Shop.BuyItem(this));
+	}
+	void Initialize()
+	{
 		switch (itemClass)
 		{
 			case(ItemClass.WEAPON):
@@ -100,24 +112,57 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 			});
 			break;
 		}
-		requiredLevelTxt.text = requiredLevel.ToString();
-		requiredScoreTxt.text = requiredScore.ToString();
-		requiredChargeTxt.text= requiredCharge.ToString();
-		
-		UIController.IfClick_GoTo(donateBtn, ()=> Shop.DonateItem(this));
-		UIController.IfClick_GoTo(buyBtn, ()=> Shop.BuyItem(this));
 	}
 	public new void OnEnable()
 	{
 		base.OnEnable();
-		detailPanel.SetActive(false);
+		CheckIfWeCanUnlockTheItem();
+		CheckForItemRequirements();
+		detailPanel.SetActive(true);
 
 	}
-	public void OnPointerEnter(PointerEventData eventData)
+
+    public void CheckForItemRequirements()
+    {
+		// checking wether we should show the requirements of this Item to be purchased
+		if(requiredBadge == Shop.playerModel.badge.badgeType)
+		{
+			requiredBadgeTxt.transform.parent.gameObject.SetActive(false);
+		}
+		if(requiredCharge <= Shop.playerModel.charge)
+		{
+			requiredChargeTxt.transform.parent.gameObject.SetActive(false);
+
+		}
+		if(requiredScore <= Shop.playerModel.score)
+		{
+			requiredScoreTxt.transform.parent.gameObject.SetActive(false);
+		}
+    }
+
+    private void CheckIfWeCanUnlockTheItem()
+    {
+		// #revision: check from the Database if the item is unlocked
+		if(Shop.playerModel == null)
+		{
+			UIController.ThrowError("V_ShopItem: OnEnable: Shop does not have a playerModel or has a null ref", UIController.CloseError);
+			throw new System.Exception();
+		}
+		// print("current player badge is worth: " + (int)Shop.playerModel.badge.badgeType + " XP");
+		if (Shop.playerModel.badge.badgeType > this.requiredBadge)
+		{
+			UnlockItem();
+		}
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
 	{
-		// StartCoroutine(UIController.FadeIn(detailPanel));
-		detailPanel.SetActive(true);
-		
+		// detailPanel.SetActive(true);
+		// checking if we are hovering on something new!! and we haven't selected any object by clicking
+		if(Shop.selectedItemByMouseHover == null && Shop.selectedItem == null)
+		{
+			Shop.selectedItemByMouseHover = this;
+		}
 		if (Shop.selectedItem == null)
 		{
 			return;
@@ -139,6 +184,7 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	{
 		if (eventData.button == PointerEventData.InputButton.Left)
 		{
+			CheckIfWeCanUnlockTheItem();
 			EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 		}
 		// to prevent comparing 2 similar weapon or gear!!
@@ -149,16 +195,17 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 	}
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		// Shop.compareeItem = null;
-		detailPanel.SetActive(false);
-		// StartCoroutine(UIController.FadeOut(detailPanel));
+		if(Shop.selectedItemByMouseHover == this)
+		{
+			Shop.selectedItemByMouseHover = null;
+		}
+		// detailPanel.SetActive(false);
 	}
 
 	public void OnSelect(BaseEventData eventData)
 	{
 		try
 		{
-			// print("selecting item");
 			Shop.selectedItem = eventData.selectedObject.GetComponent<V_ShopItem>();
 		}
 		catch (System.Exception err)
@@ -175,7 +222,9 @@ public class V_ShopItem : V_UIElement, IPointerEnterHandler , IPointerDownHandle
 
 	public void UnlockItem()
 	{
+		// #revision: some effect to unlock item
 		itemLock.SetActive(false);
+		// #revision: save on Database
 	}
 
 

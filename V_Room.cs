@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-
+using Random = UnityEngine.Random;
 
 public class V_Room : V_UIElement 
 {
@@ -42,7 +42,7 @@ public class V_Room : V_UIElement
 	[SerializeField] Toggle autoTeamSelectionToggle;
 
 	//  buttons
-	public Button start_Join_Ready, inviteBtn;
+	public Button start_Join_Ready, inviteBtn, SwitchTeam;
 	
 	
 	// methods
@@ -57,6 +57,8 @@ public class V_Room : V_UIElement
 
 		UIController.IfClick_GoTo(start_Join_Ready, StartJoinReady);
 		UIController.IfClick_GoTo(inviteBtn, Invite);
+		UIController.IfClick_GoTo(SwitchTeam, SwitchTeams);
+		
 
 		UIController.OnDropDownChangesValue(gameMode, (value)=> 
 		{
@@ -75,27 +77,33 @@ public class V_Room : V_UIElement
 		// UIController.OnDropDownChangesValue(map, (value) => {LobbyManager.currentRoom.map = UIController.ReturnMap(map.options[map.value].text);});
 		// #revision
 		// do this for other dropdowns
-	} 
-	new void OnEnable()
+	}
+
+    private void SwitchTeams()
+    {
+        // #revision
+    }
+
+    new void OnEnable()
 	{
 		base.OnEnable();
 		UIController.currentPanel = this.gameObject;
 
-		UIController.IfClick_GoTo(UIController.backButton, 
-		() => 
-		{
-			UIController.AskYesNoQ("Are u sure u want to discard the room?", 
-			() => // yes answer
-			{
-				UIController.GoFrom_To(UIController.genericYesNoModal, UIController.LobbyPanel); 
-				UIController.Disable_EnableUI(this.gameObject);
-				LobbyManager.RemoveRoom(LobbyManager.currentRoom.ID);
-			}, 
-			() => // no answer
-			{
-				UIController.GoFrom_To(UIController.genericYesNoModal, UIController.RoomPanel);
-			});
-		});
+		// UIController.IfClick_GoTo(UIController.backButton, 
+		// () => 
+		// {
+		// 	UIController.AskYesNoQ("Are u sure u want to discard the room?", 
+		// 	() => // yes answer
+		// 	{
+		// 		UIController.GoFrom_To(UIController.genericYesNoModal, UIController.LobbyPanel); 
+		// 		UIController.Disable_EnableUI(this.gameObject);
+		// 		LobbyManager.RemoveRoom(LobbyManager.currentRoom.ID);
+		// 	}, 
+		// 	() => // no answer
+		// 	{
+		// 		UIController.GoFrom_To(UIController.genericYesNoModal, UIController.RoomPanel);
+		// 	});
+		// });
 
 		// #revision: read all the on-server data to keep UI in sync.
 		SetObjectives(1, 20);
