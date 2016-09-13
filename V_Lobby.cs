@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class V_Lobby : V_UIElement 
 {
@@ -9,24 +11,38 @@ public class V_Lobby : V_UIElement
 	
 	// panels to go from Lobby
 	public GameObject gameModePanel;
+	public Transform  fastCreateRoomPanelTransform, CreateRoomPanelTransform;
 	
 	// Buttons
 
-	public Button enterButton, createRoomButton, fastRoomButton, GM_SD_Button, GM_TMD_Button;
-
-	private bool firstCreateTheRoom = true; // !!!
+	public Button enterButton, createRoomButton, fastRoomButton;
+	public Button GM_SD_Button, GM_TMD_Button, GM_DM_Button;
+	bool firstCreateTheRoom;
+	float gameModePreferredHeight;
 	
 	new void Awake()
 	{
+		float gameModePreferredHeight = gameModePanel.GetComponent<LayoutElement>().preferredHeight;
+		print(gameModePreferredHeight);
+
 		base.Awake();
 		// #Revision 
 		LobbyManager = FindObjectOfType<V_CustomLobbyManager>();
+		try
+		{
+			UIController.IfClick_GoTo(enterButton, OnEnterTheRoom);
+			UIController.IfClick_GoTo(createRoomButton, ()=> OnCreateRoom());
+			UIController.IfClick_GoTo(fastRoomButton, ()=> OnCreateFastRoom());	
+			UIController.IfClick_GoTo(GM_SD_Button, () => {ChangeGameMode(GameModes.SD);});
+			UIController.IfClick_GoTo(GM_TMD_Button, () => {ChangeGameMode(GameModes.TDM);});
+			// #add other gameModes buttons
+		}
+		catch (System.Exception err)
+		{
+			UIController.ThrowError(err.Message, UIController.CloseError);
+			throw;
+		}
 
-		UIController.IfClick_GoTo(enterButton, OnEnterTheRoom);
-		UIController.IfClick_GoTo(createRoomButton, OnCreateRoom);
-		UIController.IfClick_GoTo(fastRoomButton, OnCreateFastRoom);	
-		UIController.IfClick_GoTo(GM_SD_Button, () => {ChangeGameMode(GameModes.SD);});
-		UIController.IfClick_GoTo(GM_TMD_Button, () => {ChangeGameMode(GameModes.TDM);});
 	}
 	new void OnEnable()
 	{
@@ -49,12 +65,6 @@ public class V_Lobby : V_UIElement
 	void OnCreateRoom()
 	{
 		// go to Room page
-		if (createRoomButton == null)
-		{
-			print("V_Lobby: OnCreateRoom(): createRoomButton is not set");
-			return;
-		}
-
 		if (!gameModePanel.activeInHierarchy)
 		{
 			gameModePanel.SetActive(true);
@@ -62,14 +72,39 @@ public class V_Lobby : V_UIElement
 
 		firstCreateTheRoom = true;
 	}
-	void OnCreateFastRoom()
+
+    private void SetGameModes(bool CreateTheRoomFirst)
+    {
+		// firstCreateTheRoom = CreateTheRoomFirst;
+		// LayoutElement gameModeLayout = gameModePanel.GetComponent<LayoutElement>();
+		// if(CreateTheRoomFirst && gameModePanel.transform.parent != CreateRoomPanelTransform)
+		// {
+		// 	gameModePanel.SetActive(false);
+		// 	gameModePanel.transform.SetParent(CreateRoomPanelTransform, false);
+		// 	// StartCoroutine(AnimateTheGameModePanel(gameModeLayout));
+		// }
+		// else if (!CreateTheRoomFirst && gameModePanel.transform.parent != fastCreateRoomPanelTransform)
+		// {
+		// 	gameModePanel.SetActive(false);
+		// 	gameModePanel.transform.SetParent(fastCreateRoomPanelTransform, false);
+		// 	// StartCoroutine(AnimateTheGameModePanel(gameModeLayout));
+		// }
+		// gameModePanel.SetActive(true);
+    }
+	IEnumerator AnimateTheGameModePanel(LayoutElement layout)
+	{
+		layout.preferredHeight = 0;
+		gameModePanel.SetActive(true);
+		while (layout.preferredHeight <= gameModePreferredHeight)
+		{
+			layout.preferredHeight += Time.time;
+			yield return new WaitForSeconds(UIController.waitFactor);
+		}
+		yield return null;
+	}
+    void OnCreateFastRoom()
 	{
 		// fast room creating or finding
-		if (fastRoomButton == null)
-		{
-			print("V_Lobby: CreateFastRoom(): fastRoomButton is not set");
-			return;
-		}
 
 		if (!gameModePanel.activeInHierarchy)
 		{

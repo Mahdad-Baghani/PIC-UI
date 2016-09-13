@@ -11,7 +11,7 @@ public class V_Shop : V_UIElement
 	[SpaceAttribute(10f)]
 
 	// to use while comparing the items
-	[SerializeField] private V_ShopItem _selectedItem;
+	[SerializeField] private V_ShopItem _selectedItem, itemTobuy;
 	[SerializeField] private V_ShopItem _selectedItemByMouseHover;
 	[SerializeField] private V_ShopItem _compareeItem;
 
@@ -26,6 +26,7 @@ public class V_Shop : V_UIElement
 			{
 				CompareItems(_selectedItem, _compareeItem);
 				ShowWeaponDescription(_selectedItem.description);
+				itemTobuy = _selectedItem;
 			} 
 			else
 			{
@@ -65,6 +66,7 @@ public class V_Shop : V_UIElement
 
 	[SpaceAttribute(5f)]
 	public Button buyCreditBtn;
+	public Button buyItemBtn, donateItemBtn;
 
 
 	[HeaderAttribute("Shop subButtons")]
@@ -89,6 +91,7 @@ public class V_Shop : V_UIElement
 	public GameObject weaponsPanel;
 	public GameObject gearsPanel, charactersPanel, specialItemsPanel;
 
+
 	[HeaderAttribute("Shop subPanels")]
 	[SpaceAttribute(10f)]
 	// Weapons
@@ -107,6 +110,8 @@ public class V_Shop : V_UIElement
 
 	[HeaderAttribute("References and prefabs")]
 	[SpaceAttribute(10f)]
+
+	public GameObject BuyItemModal;
 
 	public V_PlayerTemplate playerModel;
 	public GameObject weaponTo3DPlaceholder;
@@ -144,6 +149,45 @@ public class V_Shop : V_UIElement
 			weaponComparer = weaponComp.GetComponent<V_WeaponComparison>();
 			gearComparer = gearComp.GetComponent<V_GearComparison>();
 			characterComparer = characterComp.GetComponent<V_CharacterComparison>();
+			// shop main buttons
+			UIController.IfClick_GoTo(weaponBtn, () => 
+			{
+				UIController.Enable_DisableUI(weaponsPanel, gearsPanel, charactersPanel, specialItemsPanel);
+				StopComparing();
+			});
+
+			UIController.IfClick_GoTo(gearsBtn, () => 
+			{
+				UIController.Enable_DisableUI(gearsPanel, weaponsPanel, charactersPanel, specialItemsPanel);
+				StopComparing();
+			});	
+			UIController.IfClick_GoTo(characterBtn, () =>
+			{
+				UIController.Enable_DisableUI(charactersPanel, weaponsPanel, gearsPanel, specialItemsPanel);
+				StopComparing();
+			}); 
+			UIController.IfClick_GoTo(specialItemsBtn, () => 
+			{
+				UIController.Enable_DisableUI(specialItemsPanel, weaponsPanel, gearsPanel, charactersPanel);
+				StopComparing();
+			});
+
+			UIController.IfClick_GoTo(buyCreditBtn, BuyCredit);
+			UIController.IfClick_GoTo(buyItemBtn, ()=> BuyItem(itemTobuy));
+
+			// shop sub buttons
+
+			UIController.IfClick_GoTo(pistolBtn, () => UIController.Enable_DisableUI(pistolPanel, assaultPanel));
+			UIController.IfClick_GoTo(assaultBtn, () => UIController.Enable_DisableUI(assaultPanel, pistolPanel));
+
+			UIController.IfClick_GoTo(upperBodyBtn, () => UIController.Enable_DisableUI(upperBodyPanel, lowerBodyPanel, headPanel));
+			UIController.IfClick_GoTo(loweBodyBtn, () => UIController.Enable_DisableUI(lowerBodyPanel, upperBodyPanel, headPanel));
+			UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
+
+			UIController.IfClick_GoTo(specialWeaponsBtn, ()=> UIController.Enable_DisableUI(specialWeaponsPanel, specialCharacterPanel));
+			UIController.IfClick_GoTo(specialCharactersBtn, ()=> UIController.Enable_DisableUI(specialCharacterPanel, specialWeaponsPanel));
+
+			UIController.OnSliderChangesValue(rotateWeaponSlider, (value)=>RotateWeapon((int)value));
 		}
 		catch (System.Exception err)
 		{
@@ -154,44 +198,6 @@ public class V_Shop : V_UIElement
 			});
 		}
 
-		// shop main buttons
-		UIController.IfClick_GoTo(weaponBtn, () => 
-		{
-			UIController.Enable_DisableUI(weaponsPanel, gearsPanel, charactersPanel, specialItemsPanel);
-			StopComparing();
-		});
-
-		UIController.IfClick_GoTo(gearsBtn, () => 
-		{
-			UIController.Enable_DisableUI(gearsPanel, weaponsPanel, charactersPanel, specialItemsPanel);
-			StopComparing();
-		});	
-		UIController.IfClick_GoTo(characterBtn, () =>
-		{
-			UIController.Enable_DisableUI(charactersPanel, weaponsPanel, gearsPanel, specialItemsPanel);
-			StopComparing();
-		}); 
-		UIController.IfClick_GoTo(specialItemsBtn, () => 
-		{
-			UIController.Enable_DisableUI(specialItemsPanel, weaponsPanel, gearsPanel, charactersPanel);
-			StopComparing();
-		});
-
-		UIController.IfClick_GoTo(buyCreditBtn, BuyCredit);
-
-		// shop sub buttons
-
-		UIController.IfClick_GoTo(pistolBtn, () => UIController.Enable_DisableUI(pistolPanel, assaultPanel));
-		UIController.IfClick_GoTo(assaultBtn, () => UIController.Enable_DisableUI(assaultPanel, pistolPanel));
-
-		UIController.IfClick_GoTo(upperBodyBtn, () => UIController.Enable_DisableUI(upperBodyPanel, lowerBodyPanel, headPanel));
-		UIController.IfClick_GoTo(loweBodyBtn, () => UIController.Enable_DisableUI(lowerBodyPanel, upperBodyPanel, headPanel));
-		UIController.IfClick_GoTo(headBtn, () => UIController.Enable_DisableUI(headPanel, upperBodyPanel, lowerBodyPanel));
-
-		UIController.IfClick_GoTo(specialWeaponsBtn, ()=> UIController.Enable_DisableUI(specialWeaponsPanel, specialCharacterPanel));
-		UIController.IfClick_GoTo(specialCharactersBtn, ()=> UIController.Enable_DisableUI(specialCharacterPanel, specialWeaponsPanel));
-
-		UIController.OnSliderChangesValue(rotateWeaponSlider, (value)=>RotateWeapon((int)value));
 	}
 	private void RotateWeapon(int amount)
 	{
@@ -233,9 +239,8 @@ public class V_Shop : V_UIElement
 		{
 			throw new System.Exception("V_Shop: ShowWeaponDescription(): WeaponDescriptionTxt is not set from inspector");
 		}
+		WeaponDescriptionTxt.text = description;
     }
-
-
 	void Update()
 	{
 		if (!isRefreshingPlayerStat)
@@ -243,7 +248,6 @@ public class V_Shop : V_UIElement
 			StartCoroutine(RefreshPlayer());
 		}
 	}
-
 	void BuyCredit()
 	{
 
@@ -252,7 +256,6 @@ public class V_Shop : V_UIElement
 	{
 		// we can set the purchase to be sufficient to buy the selectedItem
 	}
-
 	public void BuyItem(V_ShopItem item)
 	{
 		if (item == null)
@@ -287,13 +290,8 @@ public class V_Shop : V_UIElement
 			return;
 		}
 
-		// now we ask if player really wants to buy the item
-		// we open a modal to select the time of item
-		UIController.AskYesNoQuestion("do u want to buy " + item.itemPrfb.name,
-		// if pressed yes
-		()=> {},
-		// if pressed no
-		()=> {UIController.CloseYesNoQ(); return;});
+		// we open a modal to ask for purchase details
+		UIController.Enable_DisableUI(BuyItemModal);
 	}
 	public void DonateItem(V_ShopItem item)
 	{
@@ -321,7 +319,6 @@ public class V_Shop : V_UIElement
 		yield return new WaitForSeconds(shopRefreshRate);
 		isRefreshingPlayerStat = false;
 	}
-
 	private void CompareItems(V_ShopItem item1, V_ShopItem item2 = null)
     {
 		
@@ -375,7 +372,6 @@ public class V_Shop : V_UIElement
 		gearComp.SetActive(false);
 		characterComp.SetActive(false);
 	}
-
 	void CompareWeapon(V_ShopItem item1, V_ShopItem item2)
 	{
 		tmpWeapon1 = item1.itemPrfb.GetComponent<V_Weapon>();
